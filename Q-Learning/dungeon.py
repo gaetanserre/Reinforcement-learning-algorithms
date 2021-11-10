@@ -1,0 +1,28 @@
+import numpy as np
+from enum import IntEnum
+
+class Action(IntEnum):
+  FORWARD = 0
+  BACKWARD = 1
+
+class Dungeon:
+  def __init__(self, state=0):
+    self.rewards = [2, 0, 0, 0, 10]
+    self.state = state
+  
+  def get_reward(self):
+    return self.rewards[self.state]
+
+  def get_actions(self):
+    return [Action.BACKWARD, Action.FORWARD]
+  
+  def get_new_state(self, action):
+    wind = np.random.random() <= 0.1
+
+    if wind:
+      action = Action.FORWARD if action == Action.BACKWARD else Action.BACKWARD
+    
+    if action == Action.FORWARD:
+      return min(self.state + 1, len(self.rewards) - 1)
+    else: return 0
+      
