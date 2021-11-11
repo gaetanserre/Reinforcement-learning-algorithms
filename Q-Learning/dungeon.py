@@ -6,6 +6,7 @@ class Action(IntEnum):
   BACKWARD = 1
 
 class Dungeon:
+  nb_actions = 2
   def __init__(self, state=0):
     self.rewards = [2, 0, 0, 0, 10]
     self.state = state
@@ -25,4 +26,9 @@ class Dungeon:
     if action == Action.FORWARD:
       return min(self.state + 1, len(self.rewards) - 1)
     else: return 0
+  
+  def set_state(self, state):
+    self.state = state
       
+  def is_final_state(self):
+    return False
