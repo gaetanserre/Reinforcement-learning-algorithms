@@ -23,7 +23,7 @@ class Dungeon(Gamei):
     wind = np.random.random() <= 0.1
 
     if wind:
-      action = Action.FORWARD if action == Action.BACKWARD else Action.BACKWARD
+      action = Action(int(not action))
     
     if action == Action.FORWARD:
       return min(self.state + 1, len(self.rewards) - 1)
