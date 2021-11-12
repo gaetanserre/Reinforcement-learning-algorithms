@@ -1,5 +1,6 @@
 import itertools
 from enum import IntEnum
+from gamei import Gamei
 
 class Action(IntEnum):
   R2LEFT  = 0
@@ -9,13 +10,18 @@ class Action(IntEnum):
   M2RIGHT = 4
   M2LEFT  = 5
 
-class Hanoi():
-  nb_actions = 6
+class Hanoi(Gamei):
+  Gamei.nb_actions = 6
   def __init__(self, N, state=None):
     if state is None:
-      self.state = tuple([0] * N)
+      """
+      A state is a tuple of size N. Each index corresponds
+      to a disk, the first one is the smallest and the last one the biggest.
+      Each element corresponds to the pole where the disk at index i is located.
+      """
+      super().__init__(tuple([0] * N) )
     else:
-      self.state = state
+      super().__init__(state)
     
     self.shape = (Hanoi.nb_actions, len(list(itertools.product(range(0,3), repeat=N))))
     self.rewards = {}
@@ -30,17 +36,16 @@ class Hanoi():
   def get_reward(self):
     return self.rewards[self.state]
   
-  def disc_on_pep(self, pep):
-    return [disc for disc in range(len(self.state)) if self.state[disc] == pep]
+  def disc_on_pole(self, pole):
+    return [disc for disc in range(len(self.state)) if self.state[disc] == pole]
 
   def is_move_allowed(self, move):
     disc_from, disc_to = None, None
-    disc_from = self.disc_on_pep(move[0])
-    disc_to = self.disc_on_pep(move[1])
+    disc_from = self.disc_on_pole(move[0])
+    disc_to = self.disc_on_pole(move[1])
 
     if disc_from == []:
       return False
-    
     else:
       disc_from = min(disc_from)
       return disc_to == [] or disc_from < min(disc_to)

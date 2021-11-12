@@ -1,13 +1,15 @@
 import numpy as np
 from enum import IntEnum
+from gamei import Gamei
 
 class Action(IntEnum):
   FORWARD = 0
   BACKWARD = 1
 
-class Dungeon:
-  nb_actions = 2
+class Dungeon(Gamei):
+  Gamei.nb_actions = 2
   def __init__(self, state=0):
+    super().__init__(state)
     self.rewards = [2, 0, 0, 0, 10]
     self.state = state
   
