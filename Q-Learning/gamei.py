@@ -1,12 +1,13 @@
 class Gamei:
-  nb_actions = None
-
-  def __init__(self, state):
+  
+  def __init__(self, state, Action):
     self.state = state
+    self.actions_list = [action for action in Action]
+    self.nb_actions = len(self.actions_list)
 
   @staticmethod
-  def actions_list():
-    pass
+  def action_to_str(action):
+    pass      
 
   def get_reward(self):
     pass

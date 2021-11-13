@@ -7,14 +7,13 @@ class Action(IntEnum):
   BACKWARD = 1
 
 class Dungeon(Gamei):
-  Gamei.nb_actions = 2
-
   @staticmethod
-  def actions_list():
-    return ["FORWARD", "BACKWARD"]
+  def action_to_str(action):
+    if action == 0: return "FORWARD"
+    else: return "BACKWARD"
 
   def __init__(self, state=0):
-    super().__init__(state)
+    super().__init__(state, Action)
     self.rewards = [2, 0, 0, 0, 10]
     self.state = state
   
@@ -22,7 +21,7 @@ class Dungeon(Gamei):
     return self.rewards[self.state]
 
   def get_actions(self):
-    return [Action.BACKWARD, Action.FORWARD]
+    return self.actions_list
   
   def get_new_state(self, action):
     wind = np.random.random() <= 0.1

@@ -11,11 +11,15 @@ class Action(IntEnum):
   R2LEFT  = 5
 
 class Hanoi(Gamei):
-  Gamei.nb_actions = 6
 
   @staticmethod
-  def actions_list():
-    return ["LEFT2MID", "LEFT2RIGHT", "MID2LEFT", "MID2RIGHT", "RIGHT2MID", "RIGHT2LEFT"]    
+  def action_to_str(action):
+    if action == 0: return "LEFT -> MID"
+    if action == 1: return "LEFT -> RIGHT"
+    if action == 2 : return "MID -> LEFT"
+    if action == 3: return "MID -> RIGHT"
+    if action == 4: return "RIGHT -> MID"
+    if action == 5: return "RIGHT -> LEFT"  
 
     
   def __init__(self, N, state=None):
@@ -25,11 +29,11 @@ class Hanoi(Gamei):
       to a disk, the first one is the smallest and the last one the biggest.
       Each element corresponds to the peg where the disk at index i is located.
       """
-      super().__init__(tuple([0] * N) )
+      super().__init__(tuple([0] * N), Action)
     else:
-      super().__init__(state)
+      super().__init__(state, Action)
     
-    self.shape = (Hanoi.nb_actions, len(list(itertools.product(range(0,3), repeat=N))))
+    self.shape = (self.nb_actions, len(list(itertools.product(range(0,3), repeat=N))))
     self.rewards = {}
     for state in itertools.product(range(0,3), repeat=N):
       self.rewards[state] = -10
@@ -37,7 +41,6 @@ class Hanoi(Gamei):
     self.rewards[self.final_state] = 10
 
     self.moves = [(0, 1), (0, 2), (1, 0), (1, 2), (2, 1), (2, 0)]
-    self.actions = [Action.L2MID, Action.L2RIGHT, Action.M2LEFT, Action.M2RIGHT, Action.R2MID, Action.R2LEFT]
   
   def get_reward(self):
     return self.rewards[self.state]
@@ -58,15 +61,15 @@ class Hanoi(Gamei):
   
   def get_actions(self):
     actions = []
-    for move, action in zip(self.moves, self.actions):
+    for move, action in zip(self.moves, self.actions_list):
       if self.is_move_allowed(move):
         actions.append(action)
     return actions
   
   def get_new_state(self, action):
     move = None
-    for i in range(len(self.actions)):
-      if action == self.actions[i]:
+    for i in range(len(self.actions_list)):
+      if action == self.actions_list[i]:
         move = self.moves[i]
         break
     
@@ -93,7 +96,7 @@ class Hanoi(Gamei):
       agent.env.set_state(agent.env.get_new_state(action))
       nb_moves += 1
       if display:
-        print(action)
+        print(agent.env.action_to_str(action))
         print(agent.env.state)
         print(f"Number of moves: {nb_moves}")
     return nb_moves

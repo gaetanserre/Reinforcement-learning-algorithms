@@ -42,7 +42,7 @@ class Agent:
     self.env = self.create_env()
     greedy_table = Agent.create_table(self.env.nb_actions)
     for _ in range(nb_iterations):
-      action = self.choose_action(self.env, greedy_table)
+      action = self.choose_action(greedy_table)
       old_state = self.env.state
       self.env.set_state(self.env.get_new_state(action))
       reward = self.env.get_reward()
@@ -76,4 +76,4 @@ class Agent:
     return q_table
   
   def policy_to_df(self, policy):
-    return pd.DataFrame(policy, index=self.env.actions_list())
+    return pd.DataFrame(policy, index=map(self.env.action_to_str, self.env.actions_list))
