@@ -8,6 +8,10 @@ class Action(IntEnum):
 
 class Dungeon(Gamei):
   Gamei.nb_actions = 2
+
+  def actions_list():
+    return ["FORWARD", "BACKWARD"]
+
   def __init__(self, state=0):
     super().__init__(state)
     self.rewards = [2, 0, 0, 0, 10]

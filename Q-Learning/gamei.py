@@ -4,6 +4,10 @@ class Gamei:
   def __init__(self, state):
     self.state = state
 
+  @staticmethod
+  def actions_list():
+    pass
+
   def get_reward(self):
     pass
 

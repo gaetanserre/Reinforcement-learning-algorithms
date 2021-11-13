@@ -3,21 +3,26 @@ from enum import IntEnum
 from gamei import Gamei
 
 class Action(IntEnum):
-  R2LEFT  = 0
-  R2MID   = 1
-  L2RIGHT = 2
-  L2MID   = 3
-  M2RIGHT = 4
-  M2LEFT  = 5
+  L2MID   = 0
+  L2RIGHT = 1
+  M2LEFT  = 2
+  M2RIGHT = 3
+  R2MID   = 4
+  R2LEFT  = 5
 
 class Hanoi(Gamei):
   Gamei.nb_actions = 6
+
+  def actions_list():
+    return ["LEFT2MID", "LEFT2RIGHT", "MID2LEFT", "MID2RIGHT", "RIGHT2MID", "RIGHT2LEFT"]    
+
+    
   def __init__(self, N, state=None):
     if state is None:
       """
       A state is a tuple of size N. Each index corresponds
       to a disk, the first one is the smallest and the last one the biggest.
-      Each element corresponds to the pole where the disk at index i is located.
+      Each element corresponds to the peg where the disk at index i is located.
       """
       super().__init__(tuple([0] * N) )
     else:
@@ -30,19 +35,19 @@ class Hanoi(Gamei):
     self.final_state = tuple([2] * N)
     self.rewards[self.final_state] = 10
 
-    self.moves = [(0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1)]
-    self.actions = [Action.L2MID, Action.L2RIGHT, Action.M2LEFT, Action.M2RIGHT, Action.R2LEFT, Action.R2MID]
+    self.moves = [(0, 1), (0, 2), (1, 0), (1, 2), (2, 1), (2, 0)]
+    self.actions = [Action.L2MID, Action.L2RIGHT, Action.M2LEFT, Action.M2RIGHT, Action.R2MID, Action.R2LEFT]
   
   def get_reward(self):
     return self.rewards[self.state]
   
-  def disc_on_pole(self, pole):
-    return [disc for disc in range(len(self.state)) if self.state[disc] == pole]
+  def disc_on_peg(self, peg):
+    return [disc for disc in range(len(self.state)) if self.state[disc] == peg]
 
   def is_move_allowed(self, move):
     disc_from, disc_to = None, None
-    disc_from = self.disc_on_pole(move[0])
-    disc_to = self.disc_on_pole(move[1])
+    disc_from = self.disc_on_peg(move[0])
+    disc_to = self.disc_on_peg(move[1])
 
     if disc_from == []:
       return False
