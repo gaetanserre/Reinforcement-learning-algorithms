@@ -13,6 +13,7 @@ class Action(IntEnum):
 class Hanoi(Gamei):
   Gamei.nb_actions = 6
 
+  @staticmethod
   def actions_list():
     return ["LEFT2MID", "LEFT2RIGHT", "MID2LEFT", "MID2RIGHT", "RIGHT2MID", "RIGHT2LEFT"]    
 
@@ -81,3 +82,18 @@ class Hanoi(Gamei):
   
   def is_final_state(self):
     return self.state == self.final_state
+
+  @staticmethod
+  def play(agent, policy, display=True):
+    agent.env = agent.create_env()
+    nb_moves = 0
+    if display: print(agent.env.state)
+    while agent.env.state != agent.env.final_state and nb_moves < 100:
+      action = agent.choose_action(policy)
+      agent.env.set_state(agent.env.get_new_state(action))
+      nb_moves += 1
+      if display:
+        print(action)
+        print(agent.env.state)
+        print(f"Number of moves: {nb_moves}")
+    return nb_moves

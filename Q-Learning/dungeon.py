@@ -9,6 +9,7 @@ class Action(IntEnum):
 class Dungeon(Gamei):
   Gamei.nb_actions = 2
 
+  @staticmethod
   def actions_list():
     return ["FORWARD", "BACKWARD"]
 
