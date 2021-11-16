@@ -97,5 +97,5 @@ class Hanoi(Gamei):
       if display:
         print(agent.env.action_to_str(action))
         print(agent.env.state)
-        print(f"Number of moves: {nb_moves}")
+    if display: print(f"Number of moves: {nb_moves}")
     return nb_moves
