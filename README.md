@@ -2,9 +2,14 @@
 This repository aims to gather some simple examples of reinforcement learning.
 
 ### Q-Learning
-In order to use `Q-Learning.ipynb` to perform Q-Learning on a game, you have to implement the interface located in `gamei.py`.
-You can see an example of an implementation of the Towers of Hanoï game in `hanoi.py`.
-Here are the results (100 moves means that the algorithm did not find a suitable solution (more than 100 moves)):
+In order to use `agent.py` to perform Q-Learning on a game, you have to implement the interface located in `gamei.py`.
+You can see example implementations in the `games` directory such as the Towers of Hanoï in `hanoi.py` or Connect 4 in `connect4.py`.
+
+In `Q-Learning.ipynb` you will see two examples of usage of `agent.py`, one for Connect 4 (you can play versus it) and one
+for the Towers of Hanoï.
+
+Here are the results for the latter (100 moves means that the algorithm did not find a suitable solution (more than 100 moves)):
+
 ![](Q-Learning/img/2_disks.jpg)
 ![](Q-Learning/img/3_disks.jpg)
 ![](Q-Learning/img/4_disks.jpg)

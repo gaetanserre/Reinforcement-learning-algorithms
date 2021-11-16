@@ -80,6 +80,7 @@ class Agent:
 
     return q_table
   
+  # Q-Learning for 2 players games
   @staticmethod
   def inverse_player(player):
     return 1 if player == 0 else 0
@@ -110,13 +111,17 @@ class Agent:
         break
 
       player = Agent.inverse_player(player)
-      _, _, new_state3 = self.play_move(envs[player], q_tables[player], gambling_rate)
+      action3, old_state3, new_state3 = self.play_move(envs[player], q_tables[player], gambling_rate)
       envs[0].set_state(new_state3)
       envs[1].set_state(new_state3)
 
       inv_player = Agent.inverse_player(player)
       q_tables[inv_player][action2][old_state2] = Agent.update_q_table(
         alpha, gamma, q_tables[inv_player], old_state2, envs[inv_player], action2)
+      
+      old_state1 = old_state3
+      action1 = action3
+      
 
   def Q_fit_2_players(self, alpha=0.9, gamma=0.95, nb_games=4000):
     self.env = self.create_env(1)

@@ -1,16 +1,20 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from enum import IntEnum
 from gamei import Gamei
 
-ROWS = 3
-COLUMNS = 4
+ROWS = 6
+COLUMNS = 7
 MAX_VALUE = 9999
 
 class Action(IntEnum):
-  ONE     = 0
-  TWO     = 1
-  THREE   = 2
-  FOUR    = 3
+  ONE   = 0
+  TWO   = 1
+  THREE = 2
+  FOUR  = 3
+  FIVE  = 4
+  SIX   = 5
+  SEVEN = 6
 
 class Connect4(Gamei):
 
@@ -95,4 +99,30 @@ class Connect4(Gamei):
   def is_final_state(self):
     reward = self.get_reward()
     return abs(reward) == MAX_VALUE or reward == 0
+  
+  @staticmethod
+  def play_vs(agent, policy, player=0, state=None):
+    player = player
+    p = Connect4(player + 1)
+    p2 = Connect4(1 if player == 2 else 2)
+    if state:
+      p.set_state(state)
+      p2.set_state(state)
+    while not p.is_final_state():
+      action = agent.choose_action(p, policy[player])
+      new_state = p.get_new_state(action)
+      p.set_state(new_state)
+      p2.set_state(new_state)
+      plt.imshow(p.colorize_state())
+      plt.show()
+
+      if p.is_final_state():
+        break
+
+      action = Action(int(input("Column:")) - 1)
+      new_state = p2.get_new_state(action)
+      p.set_state(new_state)
+      p2.set_state(new_state)
+      plt.imshow(p2.colorize_state())
+      plt.show()
   
