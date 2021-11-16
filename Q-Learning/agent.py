@@ -32,13 +32,11 @@ class Agent:
     self.Action = Action
 
   # Greedy algorithm
-  def choose_action(self, env, table, disp=False):
+  def choose_action(self, env, table):
     actions = env.get_actions()
     values = list(map(lambda a: Agent.get_table_value(table, a, env.state), actions))
 
     if values.count(values[0])==len(values):
-      if disp:
-        print("random")
       return self.Action(np.random.choice(actions))
     else:
       idx_max = max(range(len(values)), key=values.__getitem__)
@@ -85,38 +83,53 @@ class Agent:
   @staticmethod
   def inverse_player(player):
     return 1 if player == 0 else 0
-
-  def Q_fit_2_players(self, alpha=0.9, gamma=0.95, nb_iterations=4000):
-    self.env = self.create_env(1)
-    self.env1 = self.create_env(1)
-    self.env2 = self.create_env(2)
-    gambling_rate = 1
-
-    q_table1 = Agent.create_table(self.env1.nb_actions)
-    q_table2 = Agent.create_table(self.env2.nb_actions)
-    q_tables = [q_table1, q_table2]
-    envs = [self.env1, self.env2]
+  
+  def play_move(self, env, q_table, gambling_rate):
+    action = self.choose_q_action(env, q_table, gambling_rate)
+    old_state = env.state
+    new_state = env.get_new_state(action)
+    return action, old_state, new_state
+  
+  def play_game(self, envs, q_tables, gambling_rate, alpha, gamma):
     player = np.random.randint(0, 2)
-
-    for _ in range(nb_iterations):
-      action = self.choose_q_action(envs[player], q_tables[player], gambling_rate)
-
-      gambling_rate -= 1/nb_iterations
-      
-      old_state = envs[player].state
-      new_state = envs[player].get_new_state(action)
-      envs[0].set_state(new_state)
-      envs[1].set_state(new_state)
-
-      q_tables[player][action][old_state] = Agent.update_q_table(
-        alpha, gamma, q_tables[player], old_state, envs[player], action)
-
-      if envs[player].is_final_state():
-        envs[0] = self.create_env(1)
-        envs[1] = self.create_env(2)
+    action1, old_state1, new_state1 = self.play_move(envs[player], q_tables[player], gambling_rate)
+    envs[0].set_state(new_state1)
+    envs[1].set_state(new_state1)
+    while not envs[player].is_final_state():
       player = Agent.inverse_player(player)
+      
+      action2, old_state2, new_state2 = self.play_move(envs[player], q_tables[player], gambling_rate)
+      envs[0].set_state(new_state2)
+      envs[1].set_state(new_state2)
+      
+      inv_player = Agent.inverse_player(player)
+      q_tables[inv_player][action1][old_state1] = Agent.update_q_table(
+        alpha, gamma, q_tables[inv_player], old_state1, envs[inv_player], action1)
+      
+      if envs[player].is_final_state():
+        break
+
+      player = Agent.inverse_player(player)
+      _, _, new_state3 = self.play_move(envs[player], q_tables[player], gambling_rate)
+      envs[0].set_state(new_state3)
+      envs[1].set_state(new_state3)
+
+      inv_player = Agent.inverse_player(player)
+      q_tables[inv_player][action2][old_state2] = Agent.update_q_table(
+        alpha, gamma, q_tables[inv_player], old_state2, envs[inv_player], action2)
+      
+      if envs[player].is_final_state():
+        break
+
+  def Q_fit_2_players(self, alpha=0.9, gamma=0.95, nb_games=4000):
+    self.env = self.create_env(1)
+    q_tables = [self.create_table(self.env.nb_actions), self.create_table(self.env.nb_actions)]
+    gambling_rate = 1
+    for _ in range(nb_games):
+      envs = [self.create_env(1), self.create_env(2)]
+      self.play_game(envs, q_tables, gambling_rate, alpha, gamma)
+      gambling_rate -= 1/nb_games
     return q_tables
-
-
+  
   def policy_to_df(self, policy):
     return pd.DataFrame(policy, index=map(self.env.action_to_str, self.env.actions_list))

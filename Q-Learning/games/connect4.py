@@ -16,7 +16,7 @@ class Connect4(Gamei):
 
   @staticmethod
   def action_to_str(action):
-    return f"{action + 1} column"
+    return f"Column no {action + 1}"
   
   def __init__(self, player, state=None):
     if state is None:
