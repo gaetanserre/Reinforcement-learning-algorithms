@@ -33,7 +33,6 @@ class Hanoi(Gamei):
     else:
       super().__init__(state, Action)
     
-    self.shape = (self.nb_actions, len(list(itertools.product(range(0,3), repeat=N))))
     self.rewards = {}
     for state in itertools.product(range(0,3), repeat=N):
       self.rewards[state] = -10
@@ -91,8 +90,8 @@ class Hanoi(Gamei):
     agent.env = agent.create_env()
     nb_moves = 0
     if display: print(agent.env.state)
-    while agent.env.state != agent.env.final_state and nb_moves < 100:
-      action = agent.choose_action(policy)
+    while not agent.env.is_final_state() and nb_moves < 100:
+      action = agent.choose_action(agent.env, policy)
       agent.env.set_state(agent.env.get_new_state(action))
       nb_moves += 1
       if display:
