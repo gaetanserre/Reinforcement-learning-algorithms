@@ -117,9 +117,6 @@ class Agent:
       inv_player = Agent.inverse_player(player)
       q_tables[inv_player][action2][old_state2] = Agent.update_q_table(
         alpha, gamma, q_tables[inv_player], old_state2, envs[inv_player], action2)
-      
-      if envs[player].is_final_state():
-        break
 
   def Q_fit_2_players(self, alpha=0.9, gamma=0.95, nb_games=4000):
     self.env = self.create_env(1)

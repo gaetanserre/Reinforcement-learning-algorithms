@@ -33,6 +33,13 @@ class Connect4(Gamei):
 
   def convert_state(self):
     return np.array(list(self.state)).reshape((ROWS, COLUMNS))
+  
+  def colorize_state(self):
+    state = self.convert_state()
+    color = np.zeros((ROWS, COLUMNS, 3))
+    color[state == 1] = [1, 0, 0]
+    color[state == 2] = [1, 1, 0]
+    return color
 
   def winning_position(self, player):
     state = self.convert_state()
