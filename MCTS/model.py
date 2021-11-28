@@ -12,17 +12,29 @@ def coeff_determination(y_true, y_pred):
 
 def create_model(input_shape, nb_actions):
   inputs = layers.Input(input_shape)
-  outputs = layers.Dense(64, activation="relu")(inputs)
+  x_old = layers.Conv2D(10, (3,3))(inputs)
+  x_old = layers.ReLU()(x_old)
+
+  x = layers.Conv2D(10, (1,1))(x_old)
+  x = layers.ReLU()(x)
+  x = layers.Conv2D(10, (1,1))(x)
+  x = layers.ReLU()(x)
+  x = layers.Add()([x, x_old])
+  outputs = layers.Flatten()(x)
+
   policy = layers.Dense(nb_actions, activation="softmax", name="policy")(outputs)
-  value = layers.Dense(1, activation="softmax", name="value")(outputs)
+  value = layers.Dense(1, activation="tanh", name="value")(outputs)
   return tf.keras.Model(inputs=inputs, outputs=[policy, value])
 
 class Model:
-  def __init__(self, input_shape, nb_actions):
+  def __init__(self, input_shape, nb_actions, summary=False):
     self.input_shape = input_shape
     self.model = create_model(input_shape, nb_actions)
     losses = {"policy": "categorical_crossentropy", "value": "mean_squared_error"}
-    self.model.compile(loss=losses, optimizer="adam", metrics=["accuracy"])
+    metrics = {"policy": "accuracy", "value": "mean_squared_error"}
+    self.model.compile(loss=losses, optimizer="adam", metrics=metrics)
+    if summary:
+      self.model.summary()
   
   def predict(self, state):
     data = np.expand_dims(state, axis=0)
@@ -75,5 +87,5 @@ class Model:
       history = self.model.fit(train_positions, target, verbose=0, epochs=nb_epochs)
       print("Done")
       policy_acc = history.history["policy_accuracy"][-1]
-      value_acc = history.history["value_accuracy"][-1]
-      print(f"policy_accuracy: {policy_acc: .2f} value_accuracy: {value_acc: .2f}")
+      value_mse = history.history["value_mean_squared_error"][-1]
+      print(f"policy_accuracy: {policy_acc: .2f} value_mse: {value_mse: .2f}")

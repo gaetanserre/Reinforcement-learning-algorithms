@@ -19,4 +19,4 @@ Here are the results for the latter (100 moves means that the algorithm did not 
 [GPL v3](https://choosealicense.com/licenses/gpl-3.0/)
 
 ### Monte Carlo Tree Search with neural network
-Working implementation of a (really big) simplification of Connect4. See `implementation.ipynb`
+Working implementation of Connect4. See `implementation.ipynb`
