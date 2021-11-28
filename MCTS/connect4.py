@@ -4,8 +4,8 @@ from mcts import MCTS
 
 
 class Connect4():
-  ROWS = 3
-  COLUMNS = 4
+  ROWS = 6
+  COLUMNS = 7
   nb_actions = COLUMNS
 
   @staticmethod
