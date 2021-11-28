@@ -89,3 +89,9 @@ class Model:
       policy_acc = history.history["policy_accuracy"][-1]
       value_mse = history.history["value_mean_squared_error"][-1]
       print(f"policy_accuracy: {policy_acc: .2f} value_mse: {value_mse: .2f}")
+
+  def save(self, path):
+    self.model.save(path)
+  
+  def load(self, path):
+    self.model = tf.keras.models.load_model(path)
