@@ -3,6 +3,7 @@ from tensorflow.keras import layers
 from tensorflow.keras import backend as K
 import numpy as np
 from mcts import MCTS
+import matplotlib.pyplot as plt
 
 
 def coeff_determination(y_true, y_pred):
@@ -12,14 +13,21 @@ def coeff_determination(y_true, y_pred):
 
 def create_model(input_shape, nb_actions):
   inputs = layers.Input(input_shape)
-  x_old = layers.Conv2D(10, (3,3))(inputs)
+  x_old = layers.Conv2D(10, (1, 1))(inputs)
   x_old = layers.ReLU()(x_old)
 
-  x = layers.Conv2D(10, (1,1))(x_old)
+  x = layers.Conv2D(10, (1, 1))(x_old)
   x = layers.ReLU()(x)
-  x = layers.Conv2D(10, (1,1))(x)
+  x = layers.Conv2D(10, (1, 1))(x)
+  x = layers.ReLU()(x)
+  x_old = layers.Add()([x, x_old])
+
+  x = layers.Conv2D(10, (1, 1))(x_old)
+  x = layers.ReLU()(x)
+  x = layers.Conv2D(10, (1, 1))(x)
   x = layers.ReLU()(x)
   x = layers.Add()([x, x_old])
+
   outputs = layers.Flatten()(x)
 
   policy = layers.Dense(nb_actions, activation="softmax", name="policy")(outputs)
@@ -82,6 +90,9 @@ class Model:
       train_positions = np.array(train_positions)
       train_policies = np.array(train_policies)
       train_values = np.array(train_values)
+      plt.hist(train_values)
+      plt.title("Values distribution")
+      plt.show()
       
       target = {"policy": train_policies, "value": train_values}
       history = self.model.fit(train_positions, target, verbose=0, epochs=nb_epochs)

@@ -92,11 +92,13 @@ class Connect4():
       state = root.select_child().state
       plt.imshow(game.colorize_state(state))
       plt.show()
+      print(f"Eval: {model.predict(state)}")
 
-      if game.get_reward(state):
+      if game.get_reward(state) is not None:
         break
 
       action = int(input("Column:")) - 1
       state = game.get_new_state(state, action)
       plt.imshow(game.colorize_state(state))
       plt.show()
+      print(f"Eval: {model.predict(state)}")
