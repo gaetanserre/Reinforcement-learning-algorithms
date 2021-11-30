@@ -94,7 +94,8 @@ class TicTacToe():
       state = root.select_child().state
       plt.imshow(game.colorize_state(state))
       plt.show()
-      print(f"Eval: {model.predict(state)}")
+      print(f"Model prediction: {model.predict(state)}")
+      print(f"Root value: {root.value()}")
 
 
       if game.get_reward(state) is not None:
@@ -104,4 +105,5 @@ class TicTacToe():
       state = game.get_new_state(state, action)
       plt.imshow(game.colorize_state(state))
       plt.show()
-      print(f"Eval: {model.predict(state)}")
+      print(f"Model prediction: {model.predict(state)}")
+      print(f"Root value: {root.value()}")
