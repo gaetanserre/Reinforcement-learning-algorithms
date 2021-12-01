@@ -1,12 +1,11 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from mcts import MCTS
+from gamei import GameI
 
-
-class TicTacToe():
+class TicTacToe(GameI):
   ROWS = 3
   COLUMNS = 3
   nb_actions = COLUMNS * ROWS
+  shape = (ROWS, COLUMNS, 1)
 
   @staticmethod
   def get_player(state):
@@ -84,26 +83,3 @@ class TicTacToe():
     color[state == 1] = [1, 0, 0]
     color[state == -1] = [1, 1, 0]
     return color
-  
-  @staticmethod
-  def play_vs(model, state, nb_simul):
-    game = TicTacToe()
-    while game.get_reward(state) is None:
-      mcts = MCTS(TicTacToe(), state, model, nb_simul)
-      root = mcts.run()
-      state = root.select_child().state
-      plt.imshow(game.colorize_state(state))
-      plt.show()
-      print(f"Model prediction: {model.predict(state)}")
-      print(f"Root value: {root.value()}")
-
-
-      if game.get_reward(state) is not None:
-        break
-
-      action = int(input("Column:")) - 1
-      state = game.get_new_state(state, action)
-      plt.imshow(game.colorize_state(state))
-      plt.show()
-      print(f"Model prediction: {model.predict(state)}")
-      print(f"Root value: {root.value()}")

@@ -13,22 +13,29 @@ def coeff_determination(y_true, y_pred):
 
 def create_model(input_shape, nb_actions):
   inputs = layers.Input(input_shape)
-  x_old = layers.Conv2D(10, (1, 1))(inputs)
+
+  x_old = layers.Conv2D(64, (1, 1))(inputs)
   x_old = layers.ReLU()(x_old)
 
-  x = layers.Conv2D(10, (1, 1))(x_old)
+  x = layers.Conv2D(64, (1, 1))(x_old)
   x = layers.ReLU()(x)
-  x = layers.Conv2D(10, (1, 1))(x)
+  x = layers.Conv2D(64, (1, 1))(x)
   x = layers.ReLU()(x)
   x_old = layers.Add()([x, x_old])
 
-  x = layers.Conv2D(10, (1, 1))(x_old)
+  x = layers.Conv2D(64, (1, 1))(x_old)
   x = layers.ReLU()(x)
-  x = layers.Conv2D(10, (1, 1))(x)
+  x = layers.Conv2D(64, (1, 1))(x)
   x = layers.ReLU()(x)
-  x = layers.Add()([x, x_old])
+  x_old = layers.Add()([x, x_old])
 
-  outputs = layers.Flatten()(x)
+  x = layers.Conv2D(64, (1, 1))(x_old)
+  x = layers.ReLU()(x)
+  x = layers.Conv2D(64, (1, 1))(x)
+  x = layers.ReLU()(x)
+  x_old = layers.Add()([x, x_old])  
+
+  outputs = layers.Flatten()(x_old)
 
   policy = layers.Dense(nb_actions, activation="softmax", name="policy")(outputs)
   value = layers.Dense(1, activation="tanh", name="value")(outputs)

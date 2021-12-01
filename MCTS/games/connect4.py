@@ -1,12 +1,12 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from mcts import MCTS
+from gamei import GameI
 
 
-class Connect4():
+class Connect4(GameI):
   ROWS = 6
   COLUMNS = 7
   nb_actions = COLUMNS
+  shape = (ROWS, COLUMNS, 1)
 
   @staticmethod
   def get_player(state):
@@ -82,23 +82,3 @@ class Connect4():
     color[state == 1] = [1, 0, 0]
     color[state == -1] = [1, 1, 0]
     return color
-  
-  @staticmethod
-  def play_vs(model, state, nb_simul):
-    game = Connect4()
-    while game.get_reward(state) is None:
-      mcts = MCTS(Connect4(), state, model, nb_simul)
-      root = mcts.run()
-      state = root.select_child().state
-      plt.imshow(game.colorize_state(state))
-      plt.show()
-      print(f"Eval: {model.predict(state)}")
-
-      if game.get_reward(state) is not None:
-        break
-
-      action = int(input("Column:")) - 1
-      state = game.get_new_state(state, action)
-      plt.imshow(game.colorize_state(state))
-      plt.show()
-      print(f"Eval: {model.predict(state)}")

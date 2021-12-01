@@ -1,7 +1,9 @@
 import numpy as np
+from gamei import GameI
 
-class Connect2():
+class Connect2(GameI):
   nb_actions = 4
+  shape = (nb_actions+1, )
 
   @staticmethod
   def get_player(state):
@@ -51,3 +53,11 @@ class Connect2():
       return 0
     else:
       return None
+  
+  def colorize_state(self, state):
+    state = state.copy()
+    state = state[:4]
+    color = np.zeros((1, Connect2.nb_actions, 3))
+    color[:, state == 1] = [1, 0, 0]
+    color[:, state == -1] = [1, 1, 0]
+    return color
