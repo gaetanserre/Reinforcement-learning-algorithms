@@ -32,18 +32,21 @@ class GameI:
     while game.get_reward(state) is None:
       mcts = MCTS(game, state, model, nb_simul)
       root = mcts.run()
-      state = root.select_child().state
+      
+      _, action = root.select_action(0, game.nb_actions)
+      o_state = state.copy()
+      state = game.get_new_state(state, action)
       plt.imshow(game.colorize_state(state))
       plt.show()
-      print(f"Model prediction: {model.predict(state)}")
+      print(f"Model prediction: {model.predict(o_state)}")
       print(f"Root value: {root.value()}")
 
       if game.get_reward(state) is not None:
         break
 
       action = int(input("Column:"))
+      o_state = state.copy()
       state = game.get_new_state(state, action)
       plt.imshow(game.colorize_state(state))
       plt.show()
-      print(f"Model prediction: {model.predict(state)}")
-      print(f"Root value: {root.value()}")
+      print(f"Model prediction: {model.predict(o_state)}")

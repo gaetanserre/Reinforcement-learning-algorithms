@@ -1,7 +1,7 @@
 import numpy as np
 
 def ucb_score(parent, child):
-  prior_score = child.prior * np.sqrt(np.log(parent.visit_count + 1)) / (child.visit_count + 1)
+  prior_score = child.prior * np.sqrt(parent.visit_count) / (child.visit_count + 1)
   if child.visit_count > 0:
       value_score = -child.value()
   else:
@@ -21,14 +21,23 @@ class Node:
   def value(self):
     return self.value_sum / self.visit_count
 
-  def select_action(self):
-    visit_counts_distribution = np.array(
-      [child.visit_count for child in self.children.values()],
-      dtype=np.float32)
-
-    visit_counts_distribution /= np.sum(visit_counts_distribution)
-    actions = [action for action in self.children.keys()]
-    return np.random.choice(actions, p=visit_counts_distribution)
+  def select_action(self, temperature, nb_actions):
+    counts = np.zeros(nb_actions)
+    for a, child in self.children.items():
+      counts[a] = child.visit_count
+    
+    if temperature == 0:
+      probs = np.zeros(counts.shape[0])
+      bestAs = np.array(np.argwhere(counts == np.max(counts))).flatten()
+      bestA = np.random.choice(bestAs)
+      probs[bestA] = 1
+      return probs, bestA
+    else:
+      counts = counts ** (1/temperature)
+      visit_counts_distribution = counts / np.sum(counts)
+      actions = np.arange(0, nb_actions, 1)
+      bestA = np.random.choice(actions, p=visit_counts_distribution)
+      return visit_counts_distribution, bestA
   
   def select_child(self):
     best_score = -np.inf
@@ -57,9 +66,9 @@ class MCTS:
     self.model = model
     self.nb_simulations = nb_simulations
   
-  def backtrack(self, visited, reward):
+  def backtrack(self, visited, player, reward):
     for node in visited:
-      node.value_sum += reward * node.player
+      node.value_sum += reward if player == node.player else -reward
       node.visit_count += 1
 
   @staticmethod
@@ -89,6 +98,6 @@ class MCTS:
         policy, reward = self.model.predict(node.state)
         policy = self.normalize_policy(policy, self.game.get_actions(state))
         node.expand(policy, self.game)
-      self.backtrack(visited, reward)
+      self.backtrack(visited, node.player, reward)
 
     return root

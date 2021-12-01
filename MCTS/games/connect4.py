@@ -66,9 +66,10 @@ class Connect4(GameI):
     return False
 
   def get_reward(self, state):
-    if self.is_win(state, 1):
+    player = self.get_player(state)
+    if self.is_win(state, player):
       return 1
-    elif self.is_win(state, -1):
+    elif self.is_win(state, -player):
       return -1
     elif not self.get_actions(state).any():
       return 0
