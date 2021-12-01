@@ -5,7 +5,7 @@ class TicTacToe(GameI):
   ROWS = 3
   COLUMNS = 3
   nb_actions = COLUMNS * ROWS
-  shape = (ROWS, COLUMNS, 1)
+  shape = (ROWS, COLUMNS, 2)
 
   @staticmethod
   def get_player(state):

@@ -6,7 +6,7 @@ class Connect4(GameI):
   ROWS = 6
   COLUMNS = 7
   nb_actions = COLUMNS
-  shape = (ROWS, COLUMNS, 1)
+  shape = (ROWS, COLUMNS, 2)
 
   @staticmethod
   def get_player(state):
