@@ -51,9 +51,9 @@ class Model:
 
   def train(self, game, nb_iter, nb_simulations, nb_games, nb_epochs, accept_model_params):
     accept_params = accept_model_params
+    train_positions, train_policies, train_values = [], [], []
     for i in range(nb_iter):
       print(f"{(i+1)}/{nb_iter}...")
-      train_positions, train_policies, train_values = [], [], []
       for _ in range(nb_games):
         train_positions_t, train_policies_t, train_values_t = self.execute_episode(
           game, nb_simulations)
@@ -75,15 +75,19 @@ class Model:
 
       if accept_params["enable"]:
         arena = Arena(self, old_model, game)
-        w, l = arena.play_games(accept_params["nb_games"], accept_params["nb_simuations"])
-        win_ratio = w / (w+l)
+        w, l = arena.play_games(accept_params["nb_games"], accept_params["nb_simulations"])
+        win_ratio = 0 if w+l == 0 else w / (w+l)
         print(w, l)
         print(f"Win ratio: {win_ratio}")
         if win_ratio < accept_params["min_win_ratio"]:
           print("Reject model.")
           self.model = old_model.model
+          train_positions = train_positions.tolist()
+          train_policies = train_policies.tolist()
+          train_values = train_values.tolist()
         else:
           print("Accept model.")
+          train_positions, train_policies, train_values = [], [], []
 
       print("Done")
       policy_acc = history.history["policy_accuracy"][-1]
