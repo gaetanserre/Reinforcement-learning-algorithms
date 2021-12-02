@@ -15,8 +15,6 @@ game = TicTacToe()
 model = Model(create_network(game.shape, game.nb_actions), summary=True)
 
 # %%
-params = {"enable": False, "nb_games": 15, "nb_simulations": 50, "min_win_ratio": 0.55}
-model.train(game, nb_iter=40, nb_simulations=25, nb_games=150, nb_epochs=40, accept_model_params=params, plot=True)
+params = {"nb_games": 0, "nb_simulations": 50, "min_win_ratio": 0}
+model.train(game, nb_iter=50, nb_simulations=25, nb_games=150, nb_epochs=40, accept_model_params=params, plot=True)
 model.save("networks/network_tic_tac_toe.h5")
-
-

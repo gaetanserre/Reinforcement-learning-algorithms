@@ -74,21 +74,20 @@ class Model:
       old_model = Model(tf.keras.models.clone_model(self.model))
       history = self.model.fit(train_positions, target, verbose=0, epochs=nb_epochs)
 
-      if accept_params["enable"]:
-        arena = Arena(self, old_model, game)
-        w, l = arena.play_games(accept_params["nb_games"], accept_params["nb_simulations"])
-        win_ratio = 0 if w+l == 0 else w / (w+l)
-        print(w, l)
-        print(f"Win ratio: {win_ratio}")
-        if win_ratio < accept_params["min_win_ratio"]:
-          print("Reject model.")
-          self.model = old_model.model
-          train_positions = train_positions.tolist()
-          train_policies = train_policies.tolist()
-          train_values = train_values.tolist()
-        else:
-          print("Accept model.")
-          train_positions, train_policies, train_values = [], [], []
+      arena = Arena(self, old_model, game)
+      w, l = arena.play_games(accept_params["nb_games"], accept_params["nb_simulations"])
+      win_ratio = 0 if w+l == 0 else w / (w+l)
+      print(w, l)
+      print(f"Win ratio: {win_ratio}")
+      if win_ratio < accept_params["min_win_ratio"]:
+        print("Reject model.")
+        self.model = old_model.model
+        train_positions = train_positions.tolist()
+        train_policies = train_policies.tolist()
+        train_values = train_values.tolist()
+      else:
+        print("Accept model.")
+        train_positions, train_policies, train_values = [], [], []
 
       print("Done")
       policy_acc = history.history["policy_accuracy"][-1]
