@@ -40,5 +40,5 @@ def create_network(input_shape, nb_actions):
   policy = layers.Dense(nb_actions, activation="softmax", name="policy")(x)
   value = layers.Dense(1, activation="tanh", name="value")(x)
   model = tf.keras.Model(inputs=inputs, outputs=[policy, value])
-  model._name = "TicTacToe network"
+  model._name = "TicTacToe_network"
   return model
