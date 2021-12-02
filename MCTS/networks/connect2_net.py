@@ -13,4 +13,6 @@ def create_network(input_shape, nb_actions):
 
   policy = layers.Dense(nb_actions, activation="softmax", name="policy")(outputs)
   value = layers.Dense(1, activation="tanh", name="value")(outputs)
-  return tf.keras.Model(inputs=inputs, outputs=[policy, value])
+  model = tf.keras.Model(inputs=inputs, outputs=[policy, value])
+  model._name = "Connect2 network"
+  return model

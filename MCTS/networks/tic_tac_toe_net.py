@@ -8,31 +8,37 @@ def coeff_determination(y_true, y_pred):
     return ( 1 - SS_res/(SS_tot + K.epsilon()) )
 
 def create_network(input_shape, nb_actions):
-  inputs = layers.Input(input_shape)
+  filters = 128
+  inputs = tf.keras.Input(input_shape)
+  x = layers.Conv2D(filters, (1, 1))(inputs)
+  x = layers.BatchNormalization()(x)
+  x = layers.ReLU()(x)
 
-  x_old = layers.Conv2D(64, (1, 1))(inputs)
-  x_old = layers.ReLU()(x_old)
-  
-  x = layers.Conv2D(64, (1, 1))(x_old)
-  x = layers.ReLU()(x)
-  x = layers.Conv2D(64, (1, 1))(x)
-  x = layers.ReLU()(x)
-  x_old = layers.Add()([x, x_old])
+  for _ in range(6):
+    x_old = x
+    x = layers.Conv2D(filters, (1,1))(x)
+    x = layers.BatchNormalization()(x)
+    x = layers.ReLU()(x)
+    x = layers.Conv2D(filters, (1,1))(x)
+    x = layers.BatchNormalization()(x)
 
-  x = layers.Conv2D(64, (1, 1))(x_old)
-  x = layers.ReLU()(x)
-  x = layers.Conv2D(64, (1, 1))(x)
-  x = layers.ReLU()(x)
-  x_old = layers.Add()([x, x_old])
+    # SE
+    x_se = layers.GlobalAveragePooling2D()(x)
+    x_se = layers.Dense(filters//16, activation="relu")(x_se)
+    x_se = layers.Dense(filters, activation="sigmoid")(x_se)
+    x = layers.Multiply()([x, x_se])
 
-  x = layers.Conv2D(64, (1, 1))(x_old)
-  x = layers.ReLU()(x)
-  x = layers.Conv2D(64, (1, 1))(x)
-  x = layers.ReLU()(x)
-  x_old = layers.Add()([x, x_old])
+    x = layers.Add()([x, x_old])
+    x = layers.ReLU()(x)
 
-  outputs = layers.Flatten()(x_old)
+  x = layers.Conv2D(filters, (1, 1))(x)
+  x = layers.BatchNormalization()(x)
+  x = layers.ReLU()(x)
 
-  policy = layers.Dense(nb_actions, activation="softmax", name="policy")(outputs)
-  value = layers.Dense(1, activation="tanh", name="value")(outputs)
-  return tf.keras.Model(inputs=inputs, outputs=[policy, value])
+  x = layers.Flatten()(x)
+
+  policy = layers.Dense(nb_actions, activation="softmax", name="policy")(x)
+  value = layers.Dense(1, activation="tanh", name="value")(x)
+  model = tf.keras.Model(inputs=inputs, outputs=[policy, value])
+  model._name = "TicTacToe network"
+  return model

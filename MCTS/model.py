@@ -49,7 +49,7 @@ class Model:
         return train_positions, train_policies, train_values
 
 
-  def train(self, game, nb_iter, nb_simulations, nb_games, nb_epochs, accept_model_params):
+  def train(self, game, nb_iter, nb_simulations, nb_games, nb_epochs, accept_model_params, plot=False):
     accept_params = accept_model_params
     train_positions, train_policies, train_values = [], [], []
     for i in range(nb_iter):
@@ -65,9 +65,10 @@ class Model:
       train_policies = np.array(train_policies)
       train_values = np.array(train_values)
 
-      plt.hist(train_values)
-      plt.title("Values distribution")
-      plt.show()
+      if plot:
+        plt.hist(train_values)
+        plt.title("Values distribution")
+        plt.show()
       
       target = {"policy": train_policies, "value": train_values}
       old_model = Model(tf.keras.models.clone_model(self.model))
