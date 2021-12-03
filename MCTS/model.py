@@ -5,18 +5,25 @@ import matplotlib.pyplot as plt
 from mcts import MCTS
 from arena import Arena
 
+def shuffle_lists(l1, l2, l3):
+  a1 = np.array(l1)
+  a2 = np.array(l2)
+  a3 = np.array(l3)
+  indices = np.random.permutation(a1.shape[0])
+  return a1[indices], a2[indices], a3[indices]
+
 class Model:
   def __init__(self, nnet, summary=False):
-    self.model = nnet
+    self.nnet = nnet
     losses = {"policy": "categorical_crossentropy", "value": "mean_squared_error"}
     metrics = {"policy": "accuracy", "value": "mean_squared_error"}
-    self.model.compile(loss=losses, optimizer="adam", metrics=metrics)
+    self.nnet.compile(loss=losses, optimizer="adam", metrics=metrics)
     if summary:
-      self.model.summary()
+      self.nnet.summary()
   
   def predict(self, state):
     data = np.expand_dims(state, axis=0)
-    pred = self.model.predict(data)
+    pred = self.nnet.predict(data)
     return pred[0].flatten(), pred[1].flatten()[0]
   
 
@@ -47,8 +54,7 @@ class Model:
           p_player = (-1)**i
           train_values.append(reward if player == p_player else -reward)
         return train_positions, train_policies, train_values
-
-
+  
   def train(self, game, nb_iter, nb_simulations, nb_games, nb_epochs, accept_model_params, plot=False):
     accept_params = accept_model_params
     train_positions, train_policies, train_values = [], [], []
@@ -60,28 +66,27 @@ class Model:
         train_positions.extend(train_positions_t)
         train_policies.extend(train_policies_t)
         train_values.extend(train_values_t)
-      
-      train_positions = np.array(train_positions)
-      train_policies = np.array(train_policies)
-      train_values = np.array(train_values)
 
+      train_positions, train_policies, train_values = shuffle_lists(
+        train_positions, train_policies, train_values)
+      
       if plot:
         plt.hist(train_values)
         plt.title("Values distribution")
         plt.show()
       
       target = {"policy": train_policies, "value": train_values}
-      old_model = Model(tf.keras.models.clone_model(self.model))
-      history = self.model.fit(train_positions, target, verbose=0, epochs=nb_epochs)
+      old_nnet = Model(tf.keras.models.clone_model(self.nnet))
+      history = self.nnet.fit(train_positions, target, verbose=0, epochs=nb_epochs)
 
-      arena = Arena(self, old_model, game)
+      arena = Arena(self, old_nnet, game)
       w, l = arena.play_games(accept_params["nb_games"], accept_params["nb_simulations"])
       win_ratio = 0 if w+l == 0 else w / (w+l)
       print(w, l)
       print(f"Win ratio: {win_ratio: .2f}")
       if win_ratio < accept_params["min_win_ratio"]:
         print("Reject model.")
-        self.model = old_model.model
+        self.nnet = old_nnet.nnet
         train_positions = train_positions.tolist()
         train_policies = train_policies.tolist()
         train_values = train_values.tolist()
@@ -95,7 +100,7 @@ class Model:
       print(f"policy_accuracy: {policy_acc: .2f} value_mse: {value_mse: .2f}")
 
   def save(self, path):
-    self.model.save(path)
+    self.nnet.save(path)
   
   def load(self, path):
-    self.model = tf.keras.models.load_model(path)
+    self.nnet = tf.keras.models.load_model(path)
