@@ -87,9 +87,12 @@ class Model:
       if win_ratio < accept_params["min_win_ratio"]:
         print("Reject model.")
         self.nnet = old_nnet.nnet
+        """
         train_positions = train_positions.tolist()
         train_policies = train_policies.tolist()
         train_values = train_values.tolist()
+        """
+        train_positions, train_policies, train_values = [], [], []
       else:
         print("Accept model.")
         train_positions, train_policies, train_values = [], [], []
