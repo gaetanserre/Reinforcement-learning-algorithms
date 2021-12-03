@@ -1,5 +1,7 @@
-import matplotlib.pyplot as plt
 from mcts import MCTS
+
+import numpy as np
+import matplotlib.pyplot as plt
 
 class GameI:
 
@@ -50,3 +52,15 @@ class GameI:
       plt.imshow(game.colorize_state(state))
       plt.show()
       print(f"Model prediction: {model.predict(o_state)}")
+  
+  def play_vs_bot(self, model1, model2, state, nb_simul):
+    current_player = model1
+
+    while self.get_reward(state) is None:
+      mcts = MCTS(self, state, current_player, nb_simul)
+      root = mcts.run()
+      _, action = root.select_action(0, self.nb_actions)
+      state = self.get_new_state(state, action)
+      plt.imshow(self.colorize_state(state))
+      plt.show()
+      current_player = model2 if current_player == model1 else model2
