@@ -78,7 +78,7 @@ class Model:
       w, l = arena.play_games(accept_params["nb_games"], accept_params["nb_simulations"])
       win_ratio = 0 if w+l == 0 else w / (w+l)
       print(w, l)
-      print(f"Win ratio: {win_ratio}")
+      print(f"Win ratio: {win_ratio: .2f}")
       if win_ratio < accept_params["min_win_ratio"]:
         print("Reject model.")
         self.model = old_model.model
