@@ -8,6 +8,10 @@ class GameI:
   @staticmethod
   def get_player(state):
     pass
+
+  @staticmethod
+  def get_canonical_form(state):
+    pass
   
   @staticmethod
   def get_init_state():
@@ -40,7 +44,7 @@ class GameI:
       state = game.get_new_state(state, action)
       plt.imshow(game.colorize_state(state))
       plt.show()
-      print(f"Model prediction: {model.predict(o_state)}")
+      print(f"Model prediction: {model.predict(game.get_canonical_form(o_state))}")
       print(f"Root value: {root.value()}")
 
       if game.get_reward(state) is not None:
@@ -51,7 +55,7 @@ class GameI:
       state = game.get_new_state(state, action)
       plt.imshow(game.colorize_state(state))
       plt.show()
-      print(f"Model prediction: {model.predict(o_state)}")
+      print(f"Model prediction: {model.predict(game.get_canonical_form(o_state))}")
   
   def play_vs_bot(self, model1, model2, state, nb_simul):
     current_player = model1

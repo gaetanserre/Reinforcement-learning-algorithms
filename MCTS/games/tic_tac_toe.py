@@ -1,15 +1,20 @@
 import numpy as np
-from gamei import GameI
+from games.gamei import GameI
 
 class TicTacToe(GameI):
   ROWS = 3
   COLUMNS = 3
   nb_actions = COLUMNS * ROWS
-  shape = (ROWS, COLUMNS, 2)
+  shape = (ROWS, COLUMNS, 1)
 
   @staticmethod
   def get_player(state):
     return state[0,0,1]
+  
+  @staticmethod
+  def get_canonical_form(state):
+    res = state[:, :, 0].copy()
+    return res * TicTacToe.get_player(state)
 
   @staticmethod
   def get_init_state():

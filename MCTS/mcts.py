@@ -81,7 +81,7 @@ class MCTS:
   
   def run(self):
     root = Node(0, self.player, self.state)
-    policy, _ = self.model.predict(root.state)
+    policy, _ = self.model.predict(self.game.get_canonical_form(root.state))
     policy = self.normalize_policy(policy, self.game.get_actions(self.state))
     root.expand(policy, self.game)
 
@@ -95,7 +95,7 @@ class MCTS:
       state = node.state
       reward = self.game.get_reward(state)
       if reward is None:
-        policy, reward = self.model.predict(node.state)
+        policy, reward = self.model.predict(self.game.get_canonical_form(root.state))
         policy = self.normalize_policy(policy, self.game.get_actions(state))
         node.expand(policy, self.game)
       self.backtrack(visited, node.player, reward)

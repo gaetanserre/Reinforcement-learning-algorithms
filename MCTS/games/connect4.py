@@ -1,5 +1,5 @@
 import numpy as np
-from gamei import GameI
+from games.gamei import GameI
 
 
 class Connect4(GameI):

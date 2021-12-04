@@ -41,4 +41,7 @@ def create_network(input_shape, nb_actions):
   value = layers.Dense(1, activation="tanh", name="value")(x)
   model = tf.keras.Model(inputs=inputs, outputs=[policy, value])
   model._name = "TicTacToe_network"
+  losses = {"policy": "categorical_crossentropy", "value": "mean_squared_error"}
+  metrics = {"policy": "accuracy", "value": "mean_squared_error"}
+  model.compile(loss=losses, optimizer="adam", metrics=metrics)
   return model

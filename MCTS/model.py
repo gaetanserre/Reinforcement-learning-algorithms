@@ -1,6 +1,10 @@
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
+from random import shuffle
+
+from tqdm import tqdm
+from multiprocessing import current_process
 
 from mcts import MCTS
 from arena import Arena
@@ -12,14 +16,21 @@ def shuffle_lists(l1, l2, l3):
   indices = np.random.permutation(a1.shape[0])
   return a1[indices], a2[indices], a3[indices]
 
+def unpack(l):
+  res = []
+  for i in l:
+    for j in i:
+      res.append(j)
+  return res
+
+
 class Model:
   def __init__(self, nnet, summary=False):
     self.nnet = nnet
-    losses = {"policy": "categorical_crossentropy", "value": "mean_squared_error"}
-    metrics = {"policy": "accuracy", "value": "mean_squared_error"}
-    self.nnet.compile(loss=losses, optimizer="adam", metrics=metrics)
     if summary:
       self.nnet.summary()
+    
+    self.train_examples_history = []
   
   def predict(self, state):
     data = np.expand_dims(state, axis=0)
@@ -37,7 +48,7 @@ class Model:
     nb_moves = 0
     while True:
       nb_moves += 1
-      train_positions.append(state)
+      train_positions.append(game.get_canonical_form(state))
       mcts = MCTS(game, state, self, nb_simulations)
       root = mcts.run()
 
@@ -53,49 +64,73 @@ class Model:
         for i in range(len(train_positions)):
           p_player = (-1)**i
           train_values.append(reward if player == p_player else -reward)
-        return train_positions, train_policies, train_values
+        return [(train_positions, train_policies, train_values)]
   
-  def train(self, game, nb_iter, nb_simulations, nb_games, nb_epochs, accept_model_params, plot=False):
+  def train(self, train_examples, nb_epochs):
+    train_positions, train_policies, train_values = list(zip(*train_examples))
+    train_positions = unpack(train_positions)
+    train_policies = unpack(train_policies)
+    train_values = unpack(train_values)
+    print("NOMBRE DE POS:", len(train_positions))
+
+    train_positions = np.asarray(train_positions)
+    train_policies = np.asarray(train_policies)
+    train_values = np.asarray(train_values)
+    target = {"policy": train_policies, "value": train_values}
+    return self.nnet.fit(train_positions, target, verbose=1, epochs=nb_epochs)
+  
+  def learn(self, game, learn_params, accept_model_params, plot=False):
+    nb_iter = learn_params["nb_iter"]
+    nb_games = learn_params["nb_games"]
+    nb_simulations = learn_params["nb_simulations"]
+    nb_epochs = learn_params["nb_epochs"]
+    maxExample = learn_params["maxExample"]
+
     accept_params = accept_model_params
-    train_positions, train_policies, train_values = [], [], []
     for i in range(nb_iter):
       print(f"{(i+1)}/{nb_iter}...")
-      for _ in range(nb_games):
-        train_positions_t, train_policies_t, train_values_t = self.execute_episode(
-          game, nb_simulations)
-        train_positions.extend(train_positions_t)
-        train_policies.extend(train_policies_t)
-        train_values.extend(train_values_t)
 
-      train_positions, train_policies, train_values = shuffle_lists(
-        train_positions, train_policies, train_values)
+      # Status bar configuration
+      current = current_process()
+      pos = current._identity[0]-1 if len(current._identity) > 0 else 0
+      pbar = tqdm(total=nb_games, desc="Self play", position=pos)
+
+      train_examples = []
+      for _ in range(nb_games):
+        train_examples += self.execute_episode(game, nb_simulations)
+        pbar.update(1)
+
+      self.train_examples_history.append(train_examples)
+      if len(self.train_examples_history) > maxExample:
+        self.train_examples_history.pop(0)
+      
+      print("TAILLE:", len(self.train_examples_history))
       
       if plot:
-        plt.hist(train_values)
+        plt.hist(train_examples[2])
         plt.title("Values distribution")
         plt.show()
       
-      target = {"policy": train_policies, "value": train_values}
-      old_nnet = Model(tf.keras.models.clone_model(self.nnet))
-      history = self.nnet.fit(train_positions, target, verbose=0, epochs=nb_epochs)
+      train_examples = []
+      for e in self.train_examples_history:
+        train_examples.extend(e)
+      shuffle(train_examples)
 
-      arena = Arena(self, old_nnet, game)
+      self.save("tmp/old_nn.h5")
+      old_model = Model(None)
+      old_model.load("tmp/old_nn.h5")
+      history = self.train(train_examples, nb_epochs)
+
+      arena = Arena(self, old_model, game)
       w, l = arena.play_games(accept_params["nb_games"], accept_params["nb_simulations"])
       win_ratio = 0 if w+l == 0 else w / (w+l)
       print(w, l)
       print(f"Win ratio: {win_ratio: .2f}")
       if win_ratio < accept_params["min_win_ratio"]:
         print("Reject model.")
-        self.nnet = old_nnet.nnet
-        """
-        train_positions = train_positions.tolist()
-        train_policies = train_policies.tolist()
-        train_values = train_values.tolist()
-        """
-        train_positions, train_policies, train_values = [], [], []
+        self.load("tmp/old_nn.h5")
       else:
         print("Accept model.")
-        train_positions, train_policies, train_values = [], [], []
 
       print("Done")
       policy_acc = history.history["policy_accuracy"][-1]
