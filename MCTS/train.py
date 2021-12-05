@@ -12,11 +12,11 @@ game = TicTacToe()
 model = Model(create_network(game.shape, game.nb_actions), summary=True)
 
 # %%
-accept_model_params = {"nb_games": 0, "nb_simulations": 25, "min_win_ratio": 0}
+accept_model_params = {"nb_games": 20, "nb_simulations": 25, "min_win_ratio": 0.51}
 learn_params = {
-  "nb_iter": 15,
+  "nb_iter": 30,
   "nb_simulations": 25,
-  "nb_games": 50,
+  "nb_games": 100,
   "nb_epochs": 20,
   "maxExample": 10
 }
