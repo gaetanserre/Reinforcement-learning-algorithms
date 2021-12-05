@@ -71,7 +71,6 @@ class Model:
     train_positions = unpack(train_positions)
     train_policies = unpack(train_policies)
     train_values = unpack(train_values)
-    print("NOMBRE DE POS:", len(train_positions))
 
     train_positions = np.asarray(train_positions)
     train_policies = np.asarray(train_policies)
@@ -103,9 +102,7 @@ class Model:
       self.train_examples_history.append(train_examples)
       if len(self.train_examples_history) > maxExample:
         self.train_examples_history.pop(0)
-      
-      print("TAILLE:", len(self.train_examples_history))
-      
+            
       if plot:
         plt.hist(train_examples[2])
         plt.title("Values distribution")

@@ -8,7 +8,7 @@ def coeff_determination(y_true, y_pred):
     return ( 1 - SS_res/(SS_tot + K.epsilon()) )
 
 def create_network(input_shape, nb_actions):
-  filters = 128
+  filters = 256
   inputs = tf.keras.Input(input_shape)
   x = layers.Conv2D(filters, (1, 1))(inputs)
   x = layers.BatchNormalization()(x)
