@@ -1,4 +1,4 @@
-from mcts import MCTS
+from lib.mcts import MCTS
 
 import numpy as np
 import matplotlib.pyplot as plt
