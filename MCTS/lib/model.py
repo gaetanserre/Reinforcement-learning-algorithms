@@ -9,13 +9,6 @@ from multiprocessing import current_process
 from lib.mcts import MCTS
 from lib.arena import Arena
 
-def shuffle_lists(l1, l2, l3):
-  a1 = np.array(l1)
-  a2 = np.array(l2)
-  a3 = np.array(l3)
-  indices = np.random.permutation(a1.shape[0])
-  return a1[indices], a2[indices], a3[indices]
-
 def unpack(l):
   res = []
   for i in l:
