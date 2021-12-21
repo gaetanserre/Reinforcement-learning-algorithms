@@ -78,7 +78,7 @@ class Model:
     target = {"policy": train_policies, "value": train_values}
     return self.nnet.fit(train_positions, target, verbose=1, epochs=nb_epochs)
   
-  def learn(self, game, learn_params, accept_model_params, plot=False):
+  def learn(self, game, learn_params, accept_model_params):
     nb_iter = learn_params["nb_iter"]
     nb_games = learn_params["nb_games"]
     nb_simulations = learn_params["nb_simulations"]
@@ -102,11 +102,6 @@ class Model:
       self.train_examples_history.append(train_examples)
       if len(self.train_examples_history) > maxExample:
         self.train_examples_history.pop(0)
-            
-      if plot:
-        plt.hist(train_examples[2])
-        plt.title("Values distribution")
-        plt.show()
       
       train_examples = []
       for e in self.train_examples_history:
