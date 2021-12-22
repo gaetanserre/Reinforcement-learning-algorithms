@@ -82,7 +82,7 @@ class MCTS:
   def run(self):
     root = Node(0, self.player, self.state)
     policy, _ = self.model.predict(self.game.get_canonical_form(root.state))
-    policy = self.normalize_policy(policy, self.game.get_actions(self.state))
+    policy = self.normalize_policy(policy, self.game.get_actions(root.state))
     root.expand(policy, self.game)
 
     for _ in range(self.nb_simulations):
