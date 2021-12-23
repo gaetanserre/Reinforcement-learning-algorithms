@@ -2,7 +2,7 @@ import numpy as np
 import random
 from collections import deque
 import os
-from .utils import RANDOM_SEED
+from utils import RANDOM_SEED
 
 np.random.seed(RANDOM_SEED)
 random.seed(RANDOM_SEED)
@@ -16,7 +16,7 @@ class DQN:
 
 
   def learn(self, replay_memory):
-    batch_size = 32
+    batch_size = 128
     if len(replay_memory) < 1000: return
     mini_batch = random.sample(replay_memory, batch_size)
 
@@ -48,7 +48,7 @@ class DQN:
   
 
   def replay_exp(self, env, path,
-                 nb_episodes=1000,
+                 nb_episodes=300,
                  max_replay_memory=50_000,
                  main_update_step=5,
                  target_update_step=100):
@@ -61,12 +61,12 @@ class DQN:
     replay_memory = deque(maxlen=max_replay_memory)
     steps_update = 0
 
+    # Save the network every 100 episodes
     for episode in range(nb_episodes):
       if (episode + 1) % 100 == 0:
         self.save_nn(path)
 
-
-      obs = self.agent.convert_obs(env.reset())
+      obs = env.reset()
       done = False
 
       sum_reward = 0
@@ -81,7 +81,6 @@ class DQN:
           action = np.argmax(action_list)
         
         new_obs, reward, done, _ = env.step(self.agent.all_actions[action])
-        new_obs = self.agent.convert_obs(new_obs)
         replay_memory.append((obs, action, new_obs, reward, done))
 
         if steps_update % main_update_step == 0 or done:
@@ -107,9 +106,7 @@ class DQN:
     self.main_nn.load(os.path.join(path, "main_nn.h5"))
     self.main_nn.copy_weights(self.target_nn)
 
-
   def select_action(self, obs):
-    obs = self.agent.convert_obs(obs)
     action_list = self.main_nn.predict(np.expand_dims(obs, axis=0))
     action = np.argmax(action_list)
     return self.agent.all_actions[action]

@@ -7,9 +7,10 @@ class DenseNN:
   def __init__(self, input_shape, nb_action):
     learning_rate = 0.001
     self.model = tf.keras.Sequential()
-    self.model.add(tf.keras.layers.Dense(2048, input_shape=(input_shape,), activation="relu"))
+    self.model.add(tf.keras.layers.Dense(24, input_shape=(input_shape,), activation="relu"))
+    self.model.add(tf.keras.layers.Dense(12, input_shape=(input_shape,), activation="relu"))
     self.model.add(tf.keras.layers.Dense(nb_action, activation="linear"))
-    self.model.compile(loss="mean_squared_error", optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate), metrics=['accuracy'])
+    self.model.compile(loss="mean_squared_error", optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate))
 
   def predict(self, X):
     return self.model.predict(X)
