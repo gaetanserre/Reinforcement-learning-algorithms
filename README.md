@@ -4,6 +4,9 @@ This repository aims to gather some simple examples of reinforcement learning.
 ### Monte Carlo Tree Search with neural network
 Working implementation of several games. See `MCTS` directory.
 
+### Deep Q-Learning
+Working implementation of the OpenAI cartpole game.
+
 ### Q-Learning
 In order to use `agent.py` to perform Q-Learning on a game, you have to implement the interface located in `gamei.py`.
 You can see example implementations in the `games` directory such as the Towers of Hanoï in `hanoi.py` or Connect 4 in `connect4.py`.
