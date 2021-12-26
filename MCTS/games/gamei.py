@@ -1,10 +1,16 @@
+from lib.mcts import MCTS
+
+import numpy as np
 import matplotlib.pyplot as plt
-from mcts import MCTS
 
 class GameI:
 
   @staticmethod
   def get_player(state):
+    pass
+
+  @staticmethod
+  def get_canonical_form(state):
     pass
   
   @staticmethod
@@ -38,7 +44,7 @@ class GameI:
       state = game.get_new_state(state, action)
       plt.imshow(game.colorize_state(state))
       plt.show()
-      print(f"Model prediction: {model.predict(o_state)}")
+      print(f"Model prediction: {model.predict(game.get_canonical_form(o_state))}")
       print(f"Root value: {root.value()}")
 
       if game.get_reward(state) is not None:
@@ -49,4 +55,16 @@ class GameI:
       state = game.get_new_state(state, action)
       plt.imshow(game.colorize_state(state))
       plt.show()
-      print(f"Model prediction: {model.predict(o_state)}")
+      print(f"Model prediction: {model.predict(game.get_canonical_form(o_state))}")
+  
+  def play_vs_bot(self, model1, model2, state, nb_simul):
+    current_player = model1
+
+    while self.get_reward(state) is None:
+      mcts = MCTS(self, state, current_player, nb_simul)
+      root = mcts.run()
+      _, action = root.select_action(0, self.nb_actions)
+      state = self.get_new_state(state, action)
+      plt.imshow(self.colorize_state(state))
+      plt.show()
+      current_player = model2 if current_player == model1 else model2

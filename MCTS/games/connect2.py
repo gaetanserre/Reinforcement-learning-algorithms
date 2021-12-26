@@ -1,13 +1,18 @@
 import numpy as np
-from gamei import GameI
+from games.gamei import GameI
 
 class Connect2(GameI):
   nb_actions = 4
-  shape = (nb_actions+1, )
+  shape = (nb_actions, )
 
   @staticmethod
   def get_player(state):
     return state[4]
+  
+  @staticmethod
+  def get_canonical_form(state):
+    res = state[:-1].copy()
+    return res * Connect2.get_player(state)
 
   @staticmethod
   def get_init_state():
