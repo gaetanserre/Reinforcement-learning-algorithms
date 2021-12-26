@@ -1,25 +1,24 @@
-from DenseNN import DenseNN
-from DQN import DQN
+from agent import DQNAgent
+import gym
 import numpy as np
+import matplotlib.pyplot as plt
+
+env = gym.make("CartPole-v1")
+
+dqn_agent = DQNAgent(env, np.array([0, 1]))
+dqn_agent.learn(env, "DQN_NN", nb_episodes=300)
+dqn_agent.dqn.save_nn("DQN_NN")
 
 
+obs = env.reset()
+done = False
+steps = 0
 
-class DQNAgent():
-  """
-  The template to be used to create an agent: any controller of the power grid is expected to be a subclass of this
-  grid2op.Agent.BaseAgent.
-  """
-  def __init__(self, env):
-    """Initialize a new agent."""
-    self.all_actions = np.array([0, 1])
-    self.dqn = DQN(self, (lambda : DenseNN(env.reset().shape[0], self.all_actions.shape[0])))
+while not done:
+  steps += 1
+  plt.imshow(env.render(mode="rgb_array"))
+  obs, _, done, _ = env.step(dqn_agent.act(obs))
 
-  def act(self, observation):
-    """The action that your agent will choose depending on the observation, the reward, and whether the state is terminal"""
-    # do nothing for example (with the empty dictionary) :
-    
-    return self.dqn.select_action(observation)
+env.close()
 
-  def learn(self, env, path, nb_episodes):
-    self.dqn.replay_exp(env, path, nb_episodes=nb_episodes)
-  
+print(f"Total steps survived: {steps}")
