@@ -9,7 +9,9 @@ class DQNAgent():
   def __init__(self, env, all_actions):
     """Initialize a new agent."""
     self.all_actions = all_actions
-    self.dqn = DQN(self, (lambda : DenseNN(env.reset().shape[0], self.all_actions.shape[0])))
+    create_network = lambda : DenseNN(env.reset().shape[0], self.all_actions.shape[0])
+    print(env.reward_range)
+    self.dqn = DQN(self, env.reward_range[0], create_network)
 
   def act(self, observation):
     """The action that your agent will choose depending on the observation, the reward, and whether the state is terminal"""
@@ -19,4 +21,7 @@ class DQNAgent():
 
   def learn(self, env, path, nb_episodes):
     self.dqn.replay_exp(env, path, nb_episodes=nb_episodes)
+  
+  def convert_obs(self, obs):
+    return obs
   

@@ -2,14 +2,18 @@ import numpy as np
 import random
 from collections import deque
 import os
-from utils import RANDOM_SEED
+import json
+from .utils import RANDOM_SEED
 
 np.random.seed(RANDOM_SEED)
 random.seed(RANDOM_SEED)
 
 class DQN:
-  def __init__(self, agent, create_nn):
+  def __init__(self, agent, loosing_reward, create_nn):
     self.agent = agent
+    self.loosing_reward = loosing_reward
+    self.offset = 0
+
     self.main_nn = create_nn()
     self.target_nn = create_nn()
     self.main_nn.copy_weights(self.target_nn)
@@ -45,28 +49,32 @@ class DQN:
       y[i] = current_qs    
     
     self.main_nn.fit(X, y, batch_size, shuffle=True)
-  
+
+  @staticmethod
+  def compute_epsilon(min_eps, max_eps, decay, episode):
+    return min_eps + (max_eps - min_eps) * np.exp(-decay * episode)
 
   def replay_exp(self, env, path,
-                 nb_episodes=300,
+                 nb_episodes=500,
                  max_replay_memory=50_000,
                  main_update_step=5,
                  target_update_step=100):
 
-    epsilon = 1
     max_epsilon = 1
     min_epsilon = 0.001
     decay = 0.01
+    epsilon = self.compute_epsilon(min_epsilon, max_epsilon, decay, self.offset)
 
     replay_memory = deque(maxlen=max_replay_memory)
     steps_update = 0
 
-    # Save the network every 100 episodes
-    for episode in range(nb_episodes):
+    # Save the network and parameters every 100 episodes
+    for episode in range(self.offset, self.offset + nb_episodes):
       if (episode + 1) % 100 == 0:
         self.save_nn(path)
+        self.save_parameters(episode, path)
 
-      obs = env.reset()
+      obs = self.agent.convert_obs(env.reset())
       done = False
 
       sum_reward = 0
@@ -75,13 +83,14 @@ class DQN:
         total_steps += 1
         steps_update += 1
         if np.random.rand() <= epsilon:
-          action = np.random.randint(self.agent.all_actions.shape[0])
+          action_idx = np.random.randint(self.agent.all_actions.shape[0])
         else:
-          action_list = self.main_nn.predict(np.expand_dims(obs, axis=0))
-          action = np.argmax(action_list)
+          qs = self.main_nn.predict(np.expand_dims(obs, axis=0))
+          action_idx = np.argmax(qs)
         
-        new_obs, reward, done, _ = env.step(self.agent.all_actions[action])
-        replay_memory.append((obs, action, new_obs, reward, done))
+        new_obs, reward, done, _ = env.step(self.agent.all_actions[action_idx])
+        new_obs = self.agent.convert_obs(new_obs)
+        replay_memory.append((obs, action_idx, new_obs, reward, done))
 
         if steps_update % main_update_step == 0 or done:
           self.learn(replay_memory)
@@ -94,11 +103,32 @@ class DQN:
         self.main_nn.copy_weights(self.target_nn)
         steps_update = 0
 
-      epsilon = min_epsilon + (max_epsilon - min_epsilon) * np.exp(-decay * episode)
+      epsilon = self.compute_epsilon(min_epsilon, max_epsilon, decay, episode)
 
       print(f"Episode {episode} -> survived steps: {total_steps} total reward: {sum_reward:.2f}")
 
+
+  # Functions used to choose the best action
+  def choose_max_action(self, obs, qs):
+    # If the best action is loosing, choose the next best one
+    for _ in qs:
+      action_idx = np.argmax(qs)
+      _, reward, _, _ = obs.simulate(self.agent.all_actions[action_idx])
+      if reward == self.loosing_reward:
+        qs[action_idx] = -np.inf
+      else: return action_idx
+    # If every action are loosing, choose the first one
+    return 0
+
+  def select_action(self, obs):
+    obs_converted = self.agent.convert_obs(obs)
+    qs = self.main_nn.predict(np.expand_dims(obs_converted, axis=0)).flatten()
+    action_idx = self.choose_max_action(obs, qs)
+    return self.agent.all_actions[action_idx]
+
   
+
+  # Save and load functions
   def save_nn(self, path):
     self.main_nn.save(os.path.join(path, "main_nn.h5"))
   
@@ -106,7 +136,13 @@ class DQN:
     self.main_nn.load(os.path.join(path, "main_nn.h5"))
     self.main_nn.copy_weights(self.target_nn)
 
-  def select_action(self, obs):
-    action_list = self.main_nn.predict(np.expand_dims(obs, axis=0))
-    action = np.argmax(action_list)
-    return self.agent.all_actions[action]
+  def save_parameters(self, episode, path):
+    parameters = {}
+    parameters["offset"] = episode
+    with open(os.path.join(path, "parameters.json"), 'w') as fp:
+      json.dump(parameters, fp)
+  
+  def load_parameters(self, path):
+    with open(os.path.join(path, "parameters.json"), 'r') as fp:
+      parameters = json.load(fp)
+      self.offset = parameters["offset"]
