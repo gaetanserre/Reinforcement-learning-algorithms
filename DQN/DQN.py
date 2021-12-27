@@ -100,7 +100,7 @@ class DQN:
 
       epsilon = self.compute_epsilon(min_epsilon, max_epsilon, decay, episode)
 
-      print(f"Episode {episode} -> survived steps: {total_steps} total reward: {sum_reward:.2f}")
+      print(f"({episode+1}/{self.offset + nb_episodes}) Survived steps: {total_steps} total reward: {sum_reward:.2f}")
 
       # Save the network and parameters every 100 episodes
       if (episode + 1) % 100 == 0:
@@ -108,22 +108,11 @@ class DQN:
         self.save_parameters(episode, path)
 
 
-  # Functions used to choose the best action
-  def choose_max_action(self, obs, qs):
-    # If the best action is loosing, choose the next best one
-    for _ in qs:
-      action_idx = np.argmax(qs)
-      _, reward, _, _ = obs.simulate(self.agent.all_actions[action_idx])
-      if reward == self.loosing_reward:
-        qs[action_idx] = -np.inf
-      else: return action_idx
-    # If every action are loosing, choose the first one
-    return 0
-
+  # Function used to choose the best action
   def select_action(self, obs):
     obs_converted = self.agent.convert_obs(obs)
     qs = self.main_nn.predict(np.expand_dims(obs_converted, axis=0)).flatten()
-    action_idx = self.choose_max_action(obs, qs)
+    action_idx = np.argmax(qs)
     return self.agent.all_actions[action_idx]
 
   

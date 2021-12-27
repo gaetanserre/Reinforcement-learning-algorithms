@@ -10,7 +10,6 @@ class DQNAgent():
     """Initialize a new agent."""
     self.all_actions = all_actions
     create_network = lambda : DenseNN(env.reset().shape[0], self.all_actions.shape[0])
-    print(env.reward_range)
     self.dqn = DQN(self, env.reward_range[0], create_network)
 
   def act(self, observation):
