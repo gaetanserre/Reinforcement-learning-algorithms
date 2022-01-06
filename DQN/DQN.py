@@ -20,7 +20,7 @@ class DQN:
 
 
   def learn(self, replay_memory):
-    batch_size = 128
+    batch_size = 512
     if len(replay_memory) < 1000: return
     mini_batch = random.sample(replay_memory, batch_size)
 
