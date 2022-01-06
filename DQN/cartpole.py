@@ -10,8 +10,8 @@ network_dir = "DQN_NN"
 dqn_agent = DQNAgent(env, np.array([0, 1]))
 
 # Train the agent
-#dqn_agent.learn(env, network_dir, nb_episodes=500)
-#dqn_agent.dqn.save_nn(network_dir)
+dqn_agent.learn(env, network_dir, nb_episodes=600)
+dqn_agent.dqn.save_nn(network_dir)
 
 # Test the agent
 dqn_agent.dqn.load_nn(network_dir)
@@ -19,7 +19,6 @@ dqn_agent.dqn.load_nn(network_dir)
 total_rewards = 0
 nb_iterations = 1
 for i in range(nb_iterations):
-  dqn_agent.dqn.load_nn(network_dir)
   obs = env.reset()
   done = False
   steps = 0
@@ -31,4 +30,7 @@ for i in range(nb_iterations):
   print(f"({i+1}/{nb_iterations}) Total steps survived: {steps}")
   
 env.close()
-print(f"Average reward: {total_rewards / nb_iterations}")
+avg_reward = total_rewards / nb_iterations
+print(f"Average reward: {avg_reward}")
+if avg_reward >= 196:
+  print("Problem solved.")
