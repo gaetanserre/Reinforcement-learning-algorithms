@@ -10,8 +10,8 @@ network_dir = "DQN_NN"
 dqn_agent = DQNAgent(env, np.array([0, 1]))
 
 # Train the agent
-dqn_agent.learn(env, network_dir, nb_episodes=500)
-dqn_agent.dqn.save_nn(network_dir)
+#dqn_agent.learn(env, network_dir, nb_episodes=500)
+#dqn_agent.dqn.save_nn(network_dir)
 
 # Test the agent
 dqn_agent.dqn.load_nn(network_dir)
