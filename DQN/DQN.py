@@ -119,10 +119,10 @@ class DQN:
 
   # Save and load functions
   def save_nn(self, path):
-    self.main_nn.save(os.path.join(path, "main_nn.h5"))
+    self.main_nn.save(os.path.join(path, "main_nn.pth"))
   
   def load_nn(self, path):
-    self.main_nn.load(os.path.join(path, "main_nn.h5"))
+    self.main_nn.load(os.path.join(path, "main_nn.pth"))
     self.main_nn.copy_weights(self.target_nn)
 
   def save_parameters(self, episode, path):
