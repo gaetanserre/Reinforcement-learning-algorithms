@@ -1,5 +1,5 @@
-## Reinforcement Learning examples
-This repository aims to gather some simple examples of reinforcement learning.
+## Reinforcement Learning algorithms
+An implementation of various reinforcement learning algorithms (Q-Learning, Deep Q-Learning, Monte Carlo Tree Search with neural network, ...) on several games.
 
 ### Monte Carlo Tree Search with neural network
 Working implementation of several games. See `MCTS` directory.
