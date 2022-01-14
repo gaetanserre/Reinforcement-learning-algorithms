@@ -5,12 +5,12 @@ import torch
 import numpy as np
 
 class TorchWrapper():
-  def __init__(self, nn, device, optimizer, lossF, metrics=None):
+  def __init__(self, nn, device, optimizer, lossF, metric=None):
     self.nn = nn
     self.device = device
     self.optimizer = optimizer
     self.lossF = lossF
-    self.metrics = metrics
+    self.metric = metric
 
   @staticmethod
   def print_cuda_memory_state():
@@ -57,11 +57,11 @@ class TorchWrapper():
     train_set = torch.utils.data.TensorDataset(torch.from_numpy(X).float(), torch.from_numpy(Y).float())
     loader = self.data_to_loader(train_set, batch_size, num_workers, shuffle=shuffle)
 
-    history = {"loss": [], "val_loss": [], "metrics": [], "val_metrics": []}
+    history = {"loss": [], "val_loss": [], "metric": [], "val_metric": []}
 
     for epoch in range(epochs):  # loop over the dataset multiple times
       running_loss = 0.0
-      metrics = 0
+      metric = 0
       count = 0
       for data in loader:
         # get the inputs; data is a list of [inputs, labels]
@@ -76,8 +76,8 @@ class TorchWrapper():
         loss.backward()
         self.optimizer.step()
 
-        if self.metrics:
-          metrics += self.metrics(labels, outputs)
+        if self.metric:
+          metric += self.metric(labels, outputs)
 
         # print statistics
         running_loss += loss.item()
@@ -86,31 +86,31 @@ class TorchWrapper():
       loss = running_loss / count
       history["loss"].append(loss)
 
-      if self.metrics is not None:
-        train_metrics = metrics / count
-        history["metrics"].append(train_metrics.cpu().numpy())
+      if self.metric is not None:
+        train_metric = metric / count
+        history["metric"].append(train_metric.cpu().detach().numpy())
 
       if verbose:
         print(f"Epoch: {epoch+1} Loss: {loss:.2f}", end="")
 
-        if self.metrics is not None:
-          print(f" Metric: {train_metrics:.2f}", end="")
+        if self.metric is not None:
+          print(f" Metric: {train_metric:.2f}", end="")
         
         if valid_data:
           X_valid, Y_valid = valid_data
           Y_valid = torch.from_numpy(Y_valid)
           preds = torch.from_numpy(self.predict(X_valid, batch_size=batch_size))
 
-          if self.metrics is not None:
-            valid_metrics = self.metrics(Y_valid, preds)
-            history["val_metrics"].append(valid_metrics.cpu().numpy())
+          if self.metric is not None:
+            valid_metric = self.metric(Y_valid, preds)
+            history["val_metric"].append(valid_metric.cpu().detach().numpy())
 
           valid_loss = self.lossF(preds, Y_valid)
           history["val_loss"].append(valid_loss)
 
           print(f" Validation loss: {valid_loss:.2f}", end="")
-          if self.metrics is not None:
-            print(f" Validation metric: {valid_metrics:.2f}")
+          if self.metric is not None:
+            print(f" Validation metric: {valid_metric:.2f}")
           else: print("")
 
           self.nn.train()
