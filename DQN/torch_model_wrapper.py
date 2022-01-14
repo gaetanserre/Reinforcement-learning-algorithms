@@ -5,11 +5,11 @@ import torch
 import numpy as np
 
 class TorchWrapper():
-  def __init__(self, nn, device, optimizer, lossF, metric=None):
+  def __init__(self, nn, device, optimizer, loss_function, metric=None):
     self.nn = nn
     self.device = device
     self.optimizer = optimizer
-    self.lossF = lossF
+    self.loss_function = loss_function
     self.metric = metric
 
   @staticmethod
@@ -48,7 +48,7 @@ class TorchWrapper():
   def fit(self, X, Y,
           valid_data=None,
           epochs=1,
-          batch_size=20,
+          batch_size=32,
           num_workers=1,
           verbose=True,
           shuffle=True):
@@ -72,7 +72,7 @@ class TorchWrapper():
 
         # forward + backward + optimize
         outputs = self.nn(inputs)
-        loss = self.lossF(outputs, labels)
+        loss = self.loss_function(outputs, labels)
         loss.backward()
         self.optimizer.step()
 
@@ -105,7 +105,7 @@ class TorchWrapper():
             valid_metric = self.metric(Y_valid, preds)
             history["val_metric"].append(valid_metric.cpu().detach().numpy())
 
-          valid_loss = self.lossF(preds, Y_valid)
+          valid_loss = self.loss_function(preds, Y_valid)
           history["val_loss"].append(valid_loss)
 
           print(f" Validation loss: {valid_loss:.2f}", end="")
@@ -119,10 +119,10 @@ class TorchWrapper():
     return history
 
   def save(self, filename):
-    torch.save(self.nn.state_dict(), filename)
+    torch.save(self.nn, filename)
   
   def load(self, filename):
-    self.nn.load_state_dict(torch.load(filename))
+    self.nn = torch.load(filename)
   
   def get_parameters(self, trainable=False):
     return sum(p.numel() for p in self.nn.parameters() if not trainable or p.requires_grad)
