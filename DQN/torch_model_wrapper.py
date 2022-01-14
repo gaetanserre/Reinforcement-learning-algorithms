@@ -29,7 +29,7 @@ class TorchWrapper():
               num_workers=num_workers)
     return loader
   
-  def predict(self, X, batch_size=20, num_workers=1):
+  def predict(self, X, batch_size=32, num_workers=1):
     self.nn.eval()
     data = torch.from_numpy(X).float()
     loader = self.data_to_loader(data, batch_size, num_workers, shuffle=False)
