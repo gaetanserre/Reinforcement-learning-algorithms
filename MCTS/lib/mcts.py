@@ -95,7 +95,7 @@ class MCTS:
       state = node.state
       reward = self.game.get_reward(state)
       if reward is None:
-        policy, reward = self.model.predict(self.game.get_canonical_form(root.state))
+        policy, reward = self.model.predict(self.game.get_canonical_form(state))
         policy = self.normalize_policy(policy, self.game.get_actions(state))
         node.expand(policy, self.game)
       self.backtrack(visited, node.player, reward)
