@@ -3,6 +3,7 @@ import random
 from collections import deque
 import os
 import json
+from torch.utils.tensorboard import SummaryWriter
 from utils import RANDOM_SEED
 
 np.random.seed(RANDOM_SEED)
@@ -18,10 +19,20 @@ class DQN:
     self.target_nn = create_nn()
     self.main_nn.copy_weights(self.target_nn)
 
+    self.tensorboard_dir = "logs/"
+    self.writer = SummaryWriter()
+    self.fit_count = 0
+    self.writer_add_stats = (lambda dir, value, epoch:
+                                self.writer.add_scalar(self.tensorboard_dir + dir,
+                                                       value,
+                                                       epoch + self.fit_count))
+
+  def __del__(self):
+    self.writer.close()
 
   def learn(self, replay_memory):
-    batch_size = 512
-    if len(replay_memory) < 1000: return
+    batch_size = 128
+    if len(replay_memory) < 500: return
     mini_batch = random.sample(replay_memory, batch_size)
 
     lr = 0.7
@@ -48,7 +59,8 @@ class DQN:
       X[i] = obs
       y[i] = current_qs    
     
-    self.main_nn.fit(X, y, batch_size, shuffle=True)
+    self.main_nn.fit(X, y, batch_size, shuffle=True, tensorboard_writer=self.writer_add_stats)
+    self.fit_count += 1
 
   @staticmethod
   def compute_epsilon(min_eps, max_eps, decay, episode):
@@ -58,7 +70,7 @@ class DQN:
                  nb_episodes=500,
                  max_replay_memory=50_000,
                  main_update_step=5,
-                 target_update_step=100):
+                 target_update_step=200):
 
     max_epsilon = 1
     min_epsilon = 0.001
@@ -72,7 +84,7 @@ class DQN:
       obs = self.agent.convert_obs(env.reset())
       done = False
 
-      sum_reward = 0
+      sum_rewards = 0
       total_steps = 0
       while not done:
         total_steps += 1
@@ -91,7 +103,7 @@ class DQN:
           self.learn(replay_memory)
 
         obs = new_obs
-        sum_reward += reward
+        sum_rewards += reward
       
       if steps_update >= target_update_step:
         print("\033[92m"+"Copying main network weights to the target network" + "\033[0m")
@@ -100,13 +112,17 @@ class DQN:
 
       epsilon = self.compute_epsilon(min_epsilon, max_epsilon, decay, episode)
 
-      print(f"({episode+1}/{self.offset + nb_episodes}) Survived steps: {total_steps} total reward: {sum_reward:.2f}")
+      self.writer.add_scalar(self.tensorboard_dir + "train/sum_rewards", sum_rewards, episode)
+      self.writer.add_scalar(self.tensorboard_dir + "train/survived_steps", total_steps, episode)
+      self.writer.flush()
+
+      print(f"({episode+1}/{self.offset + nb_episodes}) Survived steps: {total_steps} total reward: {sum_rewards:.2f}")
 
       # Save the network and parameters every 100 episodes
       if (episode + 1) % 100 == 0:
         self.save_nn(path)
         self.save_parameters(episode, path)
-
+    
 
   # Function used to choose the best action
   def select_action(self, obs):

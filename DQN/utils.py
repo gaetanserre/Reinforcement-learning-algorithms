@@ -1,1 +1,2 @@
-RANDOM_SEED = 42
+import numpy as np
+RANDOM_SEED = 505

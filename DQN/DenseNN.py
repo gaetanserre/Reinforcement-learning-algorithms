@@ -1,37 +1,8 @@
-import tensorflow as tf
 import torch
 import torch.nn as nn
 from utils import RANDOM_SEED
 from torch_model_wrapper import TorchWrapper
 torch.manual_seed(RANDOM_SEED)
-
-tf.random.set_seed(RANDOM_SEED)
-
-"""
-class DenseNN:
-  def __init__(self, input_shape, nb_actions):
-    learning_rate = 0.001
-    self.model = tf.keras.Sequential()
-    self.model.add(tf.keras.layers.Dense(24, input_shape=(input_shape,), activation="relu"))
-    self.model.add(tf.keras.layers.Dense(12, input_shape=(input_shape,), activation="relu"))
-    self.model.add(tf.keras.layers.Dense(nb_actions, activation="linear"))
-    self.model.compile(loss="mean_squared_error", optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate))
-
-  def predict(self, X):
-    return self.model.predict(X)
-
-  def fit(self, X, y, batch_size, shuffle):
-    self.model.fit(X, y, verbose=True, batch_size=batch_size, shuffle=shuffle)
-  
-  def copy_weights(self, model):
-    model.model.set_weights(self.model.get_weights())
-  
-  def save(self, filename):
-    self.model.save(filename)
-  
-  def load(self, filename):
-    self.model = tf.keras.models.load_model(filename)
-"""
 
 class Model(nn.Module):
   def __init__(self, input_shape, nb_actions):
@@ -43,7 +14,9 @@ class Model(nn.Module):
       nn.ReLU(inplace=True),
       nn.Linear(32, 64),
       nn.ReLU(inplace=True),
-      nn.Linear(64, 16),
+      nn.Linear(64, 32),
+      nn.ReLU(inplace=True),
+      nn.Linear(32, 16),
       nn.ReLU(inplace=True),
       nn.Linear(16, nb_actions)
     )
@@ -64,13 +37,15 @@ class DenseNN:
   def predict(self, X):
     return self.model.predict(X, num_workers=0)
   
-  def fit(self, X, y, batch_size, shuffle):
+  def fit(self, X, y, batch_size, shuffle, tensorboard_writer, epochs=1):
     return self.model.fit(
             X,
             y,
+            epochs=epochs,
             batch_size=batch_size,
             shuffle=shuffle,
             num_workers=0,
+            tensorboard_writer=tensorboard_writer,
             verbose=False)
   
   def copy_weights(self, dense_nn):

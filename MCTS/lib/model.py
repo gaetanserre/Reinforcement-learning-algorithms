@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 from random import shuffle
+import datetime
 
 from tqdm import tqdm
 from multiprocessing import current_process
@@ -24,6 +25,10 @@ class Model:
       self.nnet.summary()
     
     self.train_examples_history = []
+
+    self.log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    self.tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=self.log_dir, histogram_freq=1)
+
   
   def predict(self, state):
     data = np.expand_dims(state, axis=0)
@@ -69,7 +74,10 @@ class Model:
     train_policies = np.asarray(train_policies)
     train_values = np.asarray(train_values)
     target = {"policy": train_policies, "value": train_values}
-    return self.nnet.fit(train_positions, target, verbose=1, epochs=nb_epochs)
+    return self.nnet.fit(train_positions,
+                         target, verbose=1,
+                         epochs=nb_epochs,
+                         callbacks=[self.tensorboard_callback])
   
   def learn(self, game, learn_params, accept_model_params):
     nb_iter = learn_params["nb_iter"]
@@ -110,7 +118,7 @@ class Model:
       w, l = arena.play_games(accept_params["nb_games"], accept_params["nb_simulations"])
       win_ratio = 0 if w+l == 0 else w / (w+l)
       print(w, l)
-      print(f"Win ratio: {win_ratio: .2f}")
+      print(f"Win ratio: {win_ratio:.2f}")
       if win_ratio < accept_params["min_win_ratio"]:
         print("Reject model.")
         self.load("tmp/old_nn.h5")
@@ -120,7 +128,7 @@ class Model:
       print("Done")
       policy_acc = history.history["policy_accuracy"][-1]
       value_mse = history.history["value_mean_squared_error"][-1]
-      print(f"policy_accuracy: {policy_acc: .2f} value_mse: {value_mse: .2f}")
+      print(f"policy_accuracy: {policy_acc:.2f} value_mse: {value_mse:.2f}")
 
   def save(self, path):
     self.nnet.save(path)

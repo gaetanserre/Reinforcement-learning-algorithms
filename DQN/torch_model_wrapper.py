@@ -52,8 +52,9 @@ class TorchWrapper():
           batch_size=32,
           num_workers=1,
           verbose=True,
-          shuffle=True):
-          
+          shuffle=True,
+          tensorboard_writer=None):
+
     self.nn.train()
     train_set = torch.utils.data.TensorDataset(torch.from_numpy(X).float(), torch.from_numpy(Y).float())
     loader = self.data_to_loader(train_set, batch_size, num_workers, shuffle=shuffle)
@@ -87,9 +88,14 @@ class TorchWrapper():
       loss = running_loss / count
       history["loss"].append(loss)
 
+      if tensorboard_writer is not None:
+        tensorboard_writer("train/loss", loss, epoch)
+
       if self.metric is not None:
         train_metric = metric / count
         history["metric"].append(train_metric.cpu().detach().numpy())
+        if tensorboard_writer is not None:
+          tensorboard_writer("train/acc", train_metric, epoch)
 
       if verbose:
         print(f"Epoch: {epoch+1} Loss: {loss:.2f}", end="")
@@ -105,9 +111,14 @@ class TorchWrapper():
           if self.metric is not None:
             valid_metric = self.metric(Y_valid, preds)
             history["val_metric"].append(valid_metric.cpu().detach().numpy())
+            if tensorboard_writer is not None:
+              tensorboard_writer("validation/acc", valid_metric, epoch)
 
           valid_loss = self.loss_function(preds, Y_valid)
           history["val_loss"].append(valid_loss)
+
+          if tensorboard_writer is not None:
+              tensorboard_writer("validation/loss", valid_loss, epoch)
 
           print(f" Validation loss: {valid_loss:.2f}", end="")
           if self.metric is not None:
@@ -116,7 +127,7 @@ class TorchWrapper():
 
           self.nn.train()
         else: print("")
-      
+
     return history
 
   def save(self, filename):
