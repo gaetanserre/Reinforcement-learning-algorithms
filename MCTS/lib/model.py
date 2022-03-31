@@ -7,6 +7,11 @@ import datetime
 from tqdm import tqdm
 from multiprocessing import current_process
 
+from numba import jit
+from numba.core.errors import NumbaWarning
+import warnings
+warnings.simplefilter('ignore', category=NumbaWarning)
+
 from lib.mcts import MCTS
 from lib.arena import Arena
 
@@ -78,7 +83,15 @@ class Model:
                          target, verbose=1,
                          epochs=nb_epochs,
                          callbacks=[self.tensorboard_callback])
-  
+  @jit(parallel=True)
+  def play_games(self, nb_games, game, nb_simulations, pbar):
+    train_examples = [[]] * nb_games
+    for i in range(nb_games):
+      train_examples[i] = self.execute_episode(game, nb_simulations)
+      pbar.update(1)
+    return train_examples
+    
+
   def learn(self, game, learn_params, accept_model_params):
     nb_iter = learn_params["nb_iter"]
     nb_games = learn_params["nb_games"]
@@ -94,11 +107,12 @@ class Model:
       current = current_process()
       pos = current._identity[0]-1 if len(current._identity) > 0 else 0
       pbar = tqdm(total=nb_games, desc="Self play", position=pos)
-
-      train_examples = []
-      for _ in range(nb_games):
-        train_examples += self.execute_episode(game, nb_simulations)
-        pbar.update(1)
+      
+      tmp = []
+      for example in self.play_games(nb_games, game, nb_simulations, pbar):
+        tmp += example
+      train_examples = tmp
+      del tmp
 
       self.train_examples_history.append(train_examples)
       if len(self.train_examples_history) > maxExample:
