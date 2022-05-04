@@ -47,12 +47,12 @@ class DQN:
     y = np.zeros((batch_size, current_qs_list[0].shape[0]))
 
     for i, (obs, action, _new_obs, reward, done) in enumerate(mini_batch):
+      # Classic Q-Learning Bellman formula
       if not done:
         future_q = reward + discount * np.max(next_qs_list[i])
       if done:
         future_q = reward
       
-      # Classic Q-Learning Bellman formula
       current_qs = current_qs_list[i]
       current_qs[action] = (1 - lr) * current_qs[action] + lr * future_q
 
@@ -93,6 +93,7 @@ class DQN:
           action_idx = np.random.randint(self.agent.all_actions.shape[0])
         else:
           qs = self.main_nn.predict(np.expand_dims(obs, axis=0))
+          print(qs)
           action_idx = np.argmax(qs)
         
         new_obs, reward, done, _ = env.step(self.agent.all_actions[action_idx])
