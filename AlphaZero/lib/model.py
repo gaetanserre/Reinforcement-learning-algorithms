@@ -10,7 +10,7 @@ from multiprocessing import current_process
 from numba import jit
 from numba.core.errors import NumbaWarning
 import warnings
-warnings.simplefilter('ignore', category=NumbaWarning)
+warnings.simplefilter("ignore", category=NumbaWarning)
 
 from lib.mcts import MCTS
 from lib.arena import Arena
