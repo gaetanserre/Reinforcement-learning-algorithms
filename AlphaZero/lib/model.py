@@ -47,7 +47,7 @@ class Model:
     train_values  = []
     state = game.get_init_state()
     
-    max_move_temp = 5
+    max_move_temp = 20
     nb_moves = 0
     while True:
       nb_moves += 1
@@ -55,7 +55,7 @@ class Model:
       mcts = MCTS(game, state, self, nb_simulations)
       root = mcts.run()
 
-      temperature = int(nb_moves < max_move_temp)
+      temperature = max(0, max_move_temp - nb_moves)
       policy, action = root.select_action(temperature, game.nb_actions)
       train_policies.append(policy)
       
