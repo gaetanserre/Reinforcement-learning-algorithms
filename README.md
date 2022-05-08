@@ -1,8 +1,8 @@
 ## Reinforcement Learning algorithms
 An implementation of various reinforcement learning algorithms (Q-Learning, Deep Q-Learning, Monte Carlo Tree Search with neural network, ...) on several games.
 
-### Monte Carlo Tree Search with neural network
-Working implementation of several games. See `MCTS` directory.
+### AlphaZero
+Working implementation of several games. See `AlphaZero` directory.
 
 ### Deep Q-Learning
 Working implementation of the OpenAI cartpole game.
