@@ -1,5 +1,5 @@
 ## Reinforcement Learning algorithms
-An implementation of various reinforcement learning algorithms (Q-Learning, Deep Q-Learning, Monte Carlo Tree Search with neural network, ...) on several games.
+An implementation of various reinforcement learning algorithms (Q-Learning, Deep Q-Learning, AlphaZero, ...) on several games.
 
 ### AlphaZero
 Working implementation of several games. See `AlphaZero` directory.
