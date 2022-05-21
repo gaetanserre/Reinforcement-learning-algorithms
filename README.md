@@ -2,10 +2,10 @@
 An implementation of various reinforcement learning algorithms (Q-Learning, Deep Q-Learning, AlphaZero) on several games.
 
 ### AlphaZero
-Working implementation of several games. See `AlphaZero` directory.
+Working implementation using several games. See `AlphaZero` directory.
 
 ### Deep Q-Learning
-Working implementation of the OpenAI cartpole game.
+Working implementation using the OpenAI cartpole game.
 
 ### Q-Learning
 In order to use `agent.py` to perform Q-Learning on a game, you have to implement the interface located in `gamei.py`.
